@@ -1,0 +1,82 @@
+KumariCinemas web form notes
+
+This file is for the website part of the assignment.
+
+Pages needed
+
+1. Default.aspx
+Use this as homepage/dashboard
+
+2. UserDetails.aspx
+Basic CRUD page for CUSTOMER
+
+3. TheaterCityHallDetails.aspx
+Basic CRUD page for THEATRECITYHALL
+
+4. MovieDetails.aspx
+Basic CRUD page for MOVIE
+
+5. ShowtimesDetails.aspx
+Basic CRUD page for SHOW
+
+6. TicketDetails.aspx
+Basic CRUD page for TICKET
+
+7. UserTicket.aspx
+Complex form
+Show selected user and tickets bought in a 6 month period
+
+8. TheaterCityHallMovie.aspx
+Complex form
+Show movie details and showtime details for a selected hall
+
+9. MovieTheatherCityHallOccupancyPerformer.aspx
+Complex form
+Show top 3 halls with highest occupancy percentage for a selected movie
+Only paid tickets should be counted
+
+Notes for development
+
+- Build homepage first, but keep it simple
+- Then do the basic forms one by one
+- Then do the complex forms
+- Do not change too many files at once
+- For foreign keys, use dropdowns if possible instead of asking user to type IDs
+- Test each page right after finishing it
+
+Testing notes
+
+For each basic form:
+- test add
+- test view
+- test update
+- test delete
+
+Keep screenshots for:
+- before
+- during
+- after
+
+For each complex form:
+- test filter/search using dropdown or selection
+- keep screenshot before selecting
+- keep screenshot after result is shown
+
+Also keep 2 or 3 error cases, for example:
+- missing required field
+- wrong or missing dropdown selection
+- wrong date/time or invalid value
+
+For each error case keep:
+- bad input screenshot
+- error screenshot
+- corrected version screenshot
+
+Report reminders
+
+After each page is finished:
+- save one clean screenshot of the final page
+- save testing screenshots
+- note what the page does
+- note what table/query it connects to
+- keep screenshots that can also be used in user manual

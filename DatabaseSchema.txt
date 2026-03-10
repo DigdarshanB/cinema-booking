@@ -1,0 +1,128 @@
+KumariCinemas database notes
+
+Main tables
+
+CUSTOMER
+- customer_id (PK)
+- customer_name
+- customer_contact
+- username
+- address
+
+THEATRE
+- theatre_id (PK)
+- theatre_name
+
+THEATRECITYHALL
+- cityhall_id (PK)
+- theatre_id (FK to THEATRE)
+- cityhall_name
+- cityhall_location
+
+MOVIE
+- movie_id (PK)
+- movie_title
+- duration
+- movie_language
+- movie_genre
+- release_date
+
+SHOW
+- show_id (PK)
+- cityhall_id (FK to THEATRECITYHALL)
+- show_date
+- show_time
+- day_type
+
+SHOW_PRICE
+- pricing_id (PK)
+- show_id (FK to SHOW)
+- show_price
+- pricing_reason
+
+SEAT
+- seat_id (PK)
+- seat_no
+- seat_status
+
+BOOKING
+- booking_id (PK)
+- show_id (FK to SHOW)
+- booking_status
+
+PAYMENT
+- payment_id (PK)
+- payment_status
+- payment_amount
+
+TICKET
+- ticket_id (PK)
+- seat_id (FK to SEAT)
+- ticket_price
+
+Bridge tables
+
+CUSTOMER_THEATRE
+- customer_id
+- theatre_id
+
+CITYHALL_MOVIE
+- cityhall_id
+- movie_id
+
+MOVIE_SHOW
+- movie_id
+- show_id
+
+SHOW_SEAT
+- show_id
+- seat_id
+
+CUSTOMER_BOOKING
+- customer_id
+- booking_id
+
+BOOKING_PAYMENT
+- booking_id
+- payment_id
+
+BOOKING_TICKET
+- booking_id
+- ticket_id
+
+Important relationship notes
+
+- One theatre can have many city halls
+- One city hall belongs to one theatre
+- One city hall can have many shows
+- One show belongs to one city hall
+- A movie and show are linked through MOVIE_SHOW
+- A customer and booking are linked through CUSTOMER_BOOKING
+- A booking and payment are linked through BOOKING_PAYMENT
+- A booking and ticket are linked through BOOKING_TICKET
+- A show and seat are linked through SHOW_SEAT
+
+Page mapping for this project
+
+UserDetails.aspx -> CUSTOMER
+TheaterCityHallDetails.aspx -> THEATRECITYHALL
+MovieDetails.aspx -> MOVIE
+ShowtimesDetails.aspx -> SHOW
+TicketDetails.aspx -> TICKET
+
+Complex forms will need joins:
+UserTicket.aspx
+TheaterCityHallMovie.aspx
+MovieTheatherCityHallOccupancyPerformer.aspx
+
+Oracle note
+
+Some bridge table names in Oracle may have hyphens and quotes, like:
+"Customer-Theatre"
+"CityHall-Movie"
+"Movie-Show"
+"Show-Seat"
+"Customer-Booking"
+"Booking-Payment"
+"Booking-Ticket"
+
