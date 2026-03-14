@@ -92,10 +92,77 @@ a:hover { color: var(--kc-accent-hover); text-decoration: none; }
 }
 
 /* Page header */
-.kc-page-header { margin-bottom: 1.5rem; padding: .5rem 0 .75rem; border-bottom: 3px solid var(--kc-accent); }
-.kc-page-header h2 { font-weight: 700; font-size: 1.6rem; color: #fff; margin-bottom: .2rem; }
-.kc-page-header p { font-size: .92rem; color: var(--kc-text-muted); margin-bottom: 0; max-width: 900px; }
-.kc-page-header h2 i { color: var(--kc-accent-gold); margin-right: .2rem; }
+.kc-page-header {
+    position: relative;
+    margin-bottom: 1.5rem;
+    padding: 1.15rem 1.2rem 1.35rem;
+    border: 1px solid #343434;
+    border-radius: 12px;
+    text-align: center;
+    overflow: hidden;
+    background:
+        radial-gradient(120% 140% at 10% 0%, rgba(240, 140, 43, .12) 0%, rgba(240, 140, 43, 0) 48%),
+        radial-gradient(130% 150% at 90% 100%, rgba(229, 9, 20, .14) 0%, rgba(229, 9, 20, 0) 52%),
+        linear-gradient(160deg, #171717 0%, #121212 56%, #0d0d0d 100%);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, .34);
+}
+.kc-page-header::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: .26;
+    background:
+        repeating-linear-gradient(135deg, rgba(255, 255, 255, .04) 0, rgba(255, 255, 255, .04) 1px, transparent 1px, transparent 14px),
+        linear-gradient(180deg, rgba(255, 255, 255, .06) 0%, rgba(255, 255, 255, 0) 28%);
+}
+.kc-page-header::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 0;
+    width: min(360px, 62%);
+    height: 3px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, rgba(170, 12, 28, .08) 0%, #be1729 20%, #f08c2b 50%, #be1729 80%, rgba(170, 12, 28, .08) 100%);
+}
+.kc-page-header h2 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .45rem;
+    font-weight: 700;
+    font-size: 1.62rem;
+    color: #fff;
+    margin-bottom: .32rem;
+    position: relative;
+    z-index: 1;
+}
+.kc-page-header p {
+    font-size: .93rem;
+    color: #b9b9b9;
+    margin-bottom: 0;
+    max-width: 780px;
+    margin-left: auto;
+    margin-right: auto;
+    position: relative;
+    z-index: 1;
+}
+.kc-page-header h2 i {
+    color: var(--kc-accent-gold);
+}
+@media (max-width: 767.98px) {
+    .kc-page-header {
+        padding: 1rem .95rem 1.2rem;
+    }
+    .kc-page-header h2 {
+        font-size: 1.34rem;
+    }
+    .kc-page-header p {
+        font-size: .88rem;
+    }
+}
 
 /* Cards */
 .kc-card {
