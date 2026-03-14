@@ -10,7 +10,11 @@ namespace KumariCinemas
         protected global::System.Web.UI.WebControls.Label lblMsg;
         protected global::System.Web.UI.WebControls.DropDownList ddlMovie;
         protected global::System.Web.UI.WebControls.Button btnSearch;
+        protected global::System.Web.UI.WebControls.Button btnReset;
         protected global::System.Web.UI.WebControls.Panel pnlResults;
+        protected global::System.Web.UI.WebControls.Label lblSelectedMovie;
+        protected global::System.Web.UI.WebControls.Label lblTopOccupancy;
+        protected global::System.Web.UI.WebControls.Label lblAvgOccupancy;
         protected global::System.Web.UI.WebControls.GridView gvOccupancy;
 
         private string Cs => ConfigurationManager.ConnectionStrings["OracleDb"].ConnectionString;
@@ -20,6 +24,9 @@ namespace KumariCinemas
             if (!IsPostBack)
             {
                 BindMovieDropDown();
+                lblSelectedMovie.Text = "-";
+                lblTopOccupancy.Text = "0%";
+                lblAvgOccupancy.Text = "0%";
             }
         }
 
@@ -44,16 +51,30 @@ namespace KumariCinemas
         protected void btnSearch_Click(object sender, EventArgs e)
         {
             lblMsg.Text = "";
+            lblMsg.CssClass = "kc-msg";
 
             if (string.IsNullOrEmpty(ddlMovie.SelectedValue))
             {
-                lblMsg.Text = "Please select a movie.";
+                SetMessage("Please select a movie.", false);
                 pnlResults.Visible = false;
                 return;
             }
 
             LoadOccupancy(ddlMovie.SelectedValue);
             pnlResults.Visible = true;
+        }
+
+        protected void btnReset_Click(object sender, EventArgs e)
+        {
+            if (ddlMovie.Items.Count > 0)
+                ddlMovie.SelectedIndex = 0;
+
+            pnlResults.Visible = false;
+            lblMsg.Text = "";
+            lblMsg.CssClass = "kc-msg";
+            lblSelectedMovie.Text = "-";
+            lblTopOccupancy.Text = "0%";
+            lblAvgOccupancy.Text = "0%";
         }
 
         private void LoadOccupancy(string movieId)
@@ -90,9 +111,46 @@ namespace KumariCinemas
                 gvOccupancy.DataSource = dt;
                 gvOccupancy.DataBind();
 
+                lblSelectedMovie.Text = ddlMovie.SelectedItem == null ? "-" : ddlMovie.SelectedItem.Text;
+
                 if (dt.Rows.Count == 0)
-                    lblMsg.Text = "No occupancy data found for this movie.";
+                {
+                    lblTopOccupancy.Text = "0%";
+                    lblAvgOccupancy.Text = "0%";
+                    SetMessage("No occupancy data found for this movie.", false);
+                    return;
+                }
+
+                decimal top = Convert.ToDecimal(dt.Rows[0]["OCCUPANCY_PCT"] == DBNull.Value ? 0 : dt.Rows[0]["OCCUPANCY_PCT"]);
+                decimal total = 0m;
+
+                foreach (DataRow row in dt.Rows)
+                {
+                    total += Convert.ToDecimal(row["OCCUPANCY_PCT"] == DBNull.Value ? 0 : row["OCCUPANCY_PCT"]);
+                }
+
+                decimal avg = total / dt.Rows.Count;
+                lblTopOccupancy.Text = top.ToString("0.##") + "%";
+                lblAvgOccupancy.Text = avg.ToString("0.##") + "%";
+                SetMessage("Occupancy analytics loaded successfully.", true);
             }
+        }
+
+        protected string GetOccupancyClass(object occupancyValue)
+        {
+            decimal value;
+            if (!decimal.TryParse((occupancyValue ?? "0").ToString(), out value))
+                value = 0m;
+
+            if (value >= 75m) return "kc-status-badge kc-status-badge-success";
+            if (value >= 40m) return "kc-status-badge kc-status-badge-warning";
+            return "kc-status-badge kc-status-badge-danger";
+        }
+
+        private void SetMessage(string message, bool success)
+        {
+            lblMsg.Text = message;
+            lblMsg.CssClass = success ? "kc-msg kc-msg-success" : "kc-msg kc-msg-error";
         }
     }
 }

@@ -10,7 +10,11 @@ namespace KumariCinemas
         protected global::System.Web.UI.WebControls.Label lblMsg;
         protected global::System.Web.UI.WebControls.DropDownList ddlCityHall;
         protected global::System.Web.UI.WebControls.Button btnSearch;
+        protected global::System.Web.UI.WebControls.Button btnReset;
         protected global::System.Web.UI.WebControls.Panel pnlResults;
+        protected global::System.Web.UI.WebControls.Label lblSelectedCityHall;
+        protected global::System.Web.UI.WebControls.Label lblMovieCount;
+        protected global::System.Web.UI.WebControls.Label lblShowtimeCount;
         protected global::System.Web.UI.WebControls.Label lblCityhallId;
         protected global::System.Web.UI.WebControls.Label lblTheatreId;
         protected global::System.Web.UI.WebControls.Label lblCityhallName;
@@ -25,6 +29,9 @@ namespace KumariCinemas
             if (!IsPostBack)
             {
                 BindCityHallDropDown();
+                lblSelectedCityHall.Text = "-";
+                lblMovieCount.Text = "0";
+                lblShowtimeCount.Text = "0";
             }
         }
 
@@ -49,10 +56,11 @@ namespace KumariCinemas
         protected void btnSearch_Click(object sender, EventArgs e)
         {
             lblMsg.Text = "";
+            lblMsg.CssClass = "kc-msg";
 
             if (string.IsNullOrEmpty(ddlCityHall.SelectedValue))
             {
-                lblMsg.Text = "Please select a city hall.";
+                SetMessage("Please select a city hall.", false);
                 pnlResults.Visible = false;
                 return;
             }
@@ -62,6 +70,20 @@ namespace KumariCinemas
             LoadMovies(cityhallId);
             LoadShowtimes(cityhallId);
             pnlResults.Visible = true;
+            SetMessage("Relationship records loaded successfully.", true);
+        }
+
+        protected void btnReset_Click(object sender, EventArgs e)
+        {
+            if (ddlCityHall.Items.Count > 0)
+                ddlCityHall.SelectedIndex = 0;
+
+            pnlResults.Visible = false;
+            lblMsg.Text = "";
+            lblMsg.CssClass = "kc-msg";
+            lblSelectedCityHall.Text = "-";
+            lblMovieCount.Text = "0";
+            lblShowtimeCount.Text = "0";
         }
 
         private void LoadCityHallDetails(string cityhallId)
@@ -85,6 +107,7 @@ namespace KumariCinemas
                     lblTheatreId.Text        = r["THEATRE_ID"].ToString();
                     lblCityhallName.Text     = r["CITYHALL_NAME"].ToString();
                     lblCityhallLocation.Text = r["CITYHALL_LOCATION"].ToString();
+                    lblSelectedCityHall.Text = lblCityhallName.Text;
                 }
             }
         }
@@ -111,6 +134,7 @@ namespace KumariCinemas
 
                 gvMovies.DataSource = dt;
                 gvMovies.DataBind();
+                lblMovieCount.Text = dt.Rows.Count.ToString();
             }
         }
 
@@ -134,7 +158,14 @@ namespace KumariCinemas
 
                 gvShowtimes.DataSource = dt;
                 gvShowtimes.DataBind();
+                lblShowtimeCount.Text = dt.Rows.Count.ToString();
             }
+        }
+
+        private void SetMessage(string message, bool success)
+        {
+            lblMsg.Text = message;
+            lblMsg.CssClass = success ? "kc-msg kc-msg-success" : "kc-msg kc-msg-error";
         }
     }
 }

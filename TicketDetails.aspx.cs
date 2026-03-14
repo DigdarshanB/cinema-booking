@@ -12,6 +12,7 @@ namespace KumariCinemas
         protected global::System.Web.UI.WebControls.DropDownList ddlSeatId;
         protected global::System.Web.UI.WebControls.TextBox txtTicketPrice;
         protected global::System.Web.UI.WebControls.Button btnAdd;
+        protected global::System.Web.UI.WebControls.Button btnClear;
         protected global::System.Web.UI.WebControls.GridView gvTickets;
 
         private string Cs => ConfigurationManager.ConnectionStrings["OracleDb"].ConnectionString;
@@ -44,8 +45,6 @@ namespace KumariCinemas
 
         private void BindGrid()
         {
-            lblMsg.Text = "";
-
             using (var con = new OracleConnection(Cs))
             using (var cmd = new OracleCommand(
                 "SELECT TICKET_ID, SEAT_ID, TICKET_PRICE FROM TICKET ORDER BY TICKET_ID", con))
@@ -78,13 +77,20 @@ namespace KumariCinemas
 
                 txtTicketId.Text    = "";
                 txtTicketPrice.Text = "";
-                lblMsg.Text = "Ticket added successfully.";
                 BindGrid();
+                SetMessage("Ticket added successfully.", true);
             }
             catch (Exception ex)
             {
-                lblMsg.Text = ex.Message;
+                SetMessage(ex.Message, false);
             }
+        }
+
+        protected void btnClear_Click(object sender, EventArgs e)
+        {
+            ResetForm();
+            lblMsg.Text = "";
+            lblMsg.CssClass = "kc-msg";
         }
 
         protected void gvTickets_RowEditing(object sender, System.Web.UI.WebControls.GridViewEditEventArgs e)
@@ -122,10 +128,11 @@ namespace KumariCinemas
 
                 gvTickets.EditIndex = -1;
                 BindGrid();
+                SetMessage("Ticket updated successfully.", true);
             }
             catch (Exception ex)
             {
-                lblMsg.Text = ex.Message;
+                SetMessage(ex.Message, false);
             }
         }
 
@@ -146,11 +153,26 @@ namespace KumariCinemas
                 }
 
                 BindGrid();
+                SetMessage("Ticket deleted successfully.", true);
             }
             catch (Exception ex)
             {
-                lblMsg.Text = ex.Message;
+                SetMessage(ex.Message, false);
             }
+        }
+
+        private void ResetForm()
+        {
+            txtTicketId.Text = "";
+            txtTicketPrice.Text = "";
+            if (ddlSeatId.Items.Count > 0)
+                ddlSeatId.SelectedIndex = 0;
+        }
+
+        private void SetMessage(string message, bool success)
+        {
+            lblMsg.Text = message;
+            lblMsg.CssClass = success ? "kc-msg kc-msg-success" : "kc-msg kc-msg-error";
         }
     }
 }

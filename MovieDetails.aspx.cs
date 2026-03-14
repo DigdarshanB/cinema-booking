@@ -15,6 +15,7 @@ namespace KumariCinemas
         protected global::System.Web.UI.WebControls.TextBox txtGenre;
         protected global::System.Web.UI.WebControls.TextBox txtReleaseDate;
         protected global::System.Web.UI.WebControls.Button btnAdd;
+        protected global::System.Web.UI.WebControls.Button btnClear;
         protected global::System.Web.UI.WebControls.GridView gvMovies;
 
         private string Cs => ConfigurationManager.ConnectionStrings["OracleDb"].ConnectionString;
@@ -29,8 +30,6 @@ namespace KumariCinemas
 
         private void BindGrid()
         {
-            lblMsg.Text = "";
-
             using (var con = new OracleConnection(Cs))
             using (var cmd = new OracleCommand(
                 "SELECT MOVIE_ID, MOVIE_TITLE, DURATION, MOVIE_LANGUAGE, MOVIE_GENRE, " +
@@ -43,6 +42,25 @@ namespace KumariCinemas
                 gvMovies.DataSource = dt;
                 gvMovies.DataBind();
             }
+        }
+
+        protected string GetMoviePoster(object titleObj)
+        {
+            string title = (titleObj ?? "").ToString().ToLowerInvariant();
+            string imgPath = "";
+
+            if (title.Contains("interstellar")) imgPath = "Interstellar.jpeg";
+            else if (title.Contains("3 idiots")) imgPath = "3Idiots.jpeg";
+            else if (title.Contains("endgame") || title.Contains("avengers")) imgPath = "Endgame.jpeg";
+            else if (title.Contains("into the wild")) imgPath = "IntoTheWild.jpeg";
+            else if (title.Contains("se7en") || title.Contains("seven")) imgPath = "Se7en.jpeg";
+
+            if (!string.IsNullOrEmpty(imgPath))
+            {
+                return $"<img src=\"{ResolveUrl("~/Content/images/movies/" + imgPath)}\" alt=\"{titleObj} Poster\" class=\"kc-movie-poster-thumb\" />";
+            }
+
+            return "<div class=\"kc-movie-poster-placeholder\" title=\"No poster available\"><i class=\"bi bi-film\"></i><span>Poster</span></div>";
         }
 
         protected void btnAdd_Click(object sender, EventArgs e)
@@ -72,13 +90,20 @@ namespace KumariCinemas
                 txtLanguage.Text    = "";
                 txtGenre.Text       = "";
                 txtReleaseDate.Text = "";
-                lblMsg.Text = "Movie added successfully.";
                 BindGrid();
+                SetMessage("Movie added successfully.", true);
             }
             catch (Exception ex)
             {
-                lblMsg.Text = ex.Message;
+                SetMessage(ex.Message, false);
             }
+        }
+
+        protected void btnClear_Click(object sender, EventArgs e)
+        {
+            ResetForm();
+            lblMsg.Text = "";
+            lblMsg.CssClass = "kc-msg";
         }
 
         protected void gvMovies_RowEditing(object sender, System.Web.UI.WebControls.GridViewEditEventArgs e)
@@ -124,10 +149,11 @@ namespace KumariCinemas
 
                 gvMovies.EditIndex = -1;
                 BindGrid();
+                SetMessage("Movie updated successfully.", true);
             }
             catch (Exception ex)
             {
-                lblMsg.Text = ex.Message;
+                SetMessage(ex.Message, false);
             }
         }
 
@@ -148,11 +174,28 @@ namespace KumariCinemas
                 }
 
                 BindGrid();
+                SetMessage("Movie deleted successfully.", true);
             }
             catch (Exception ex)
             {
-                lblMsg.Text = ex.Message;
+                SetMessage(ex.Message, false);
             }
+        }
+
+        private void ResetForm()
+        {
+            txtMovieId.Text = "";
+            txtMovieTitle.Text = "";
+            txtDuration.Text = "";
+            txtLanguage.Text = "";
+            txtGenre.Text = "";
+            txtReleaseDate.Text = "";
+        }
+
+        private void SetMessage(string message, bool success)
+        {
+            lblMsg.Text = message;
+            lblMsg.CssClass = success ? "kc-msg kc-msg-success" : "kc-msg kc-msg-error";
         }
     }
 }

@@ -154,6 +154,11 @@
     <Content Include="Content\bootstrap.min.css" />
     <Content Include="Content\bootstrap.rtl.css" />
     <Content Include="Content\bootstrap.rtl.min.css" />
+    <Content Include="Content\images\movies\3Idiots.jpeg" />
+    <Content Include="Content\images\movies\Endgame.jpeg" />
+    <Content Include="Content\images\movies\Interstellar.jpeg" />
+    <Content Include="Content\images\movies\IntoTheWild.jpeg" />
+    <Content Include="Content\images\movies\Se7en.jpeg" />
     <Content Include="Content\Site.css" />
     <Content Include="CustomerTest.aspx" />
     <Content Include="DatabaseSchema.txt" />

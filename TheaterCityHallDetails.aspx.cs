@@ -13,6 +13,7 @@ namespace KumariCinemas
         protected global::System.Web.UI.WebControls.TextBox txtCityhallName;
         protected global::System.Web.UI.WebControls.TextBox txtCityhallLocation;
         protected global::System.Web.UI.WebControls.Button btnAdd;
+        protected global::System.Web.UI.WebControls.Button btnClear;
         protected global::System.Web.UI.WebControls.GridView gvTheaters;
 
         private string Cs => ConfigurationManager.ConnectionStrings["OracleDb"].ConnectionString;
@@ -47,8 +48,6 @@ namespace KumariCinemas
 
         private void BindGrid()
         {
-            lblMsg.Text = "";
-
             using (var con = new OracleConnection(Cs))
             using (var cmd = new OracleCommand(
                 "SELECT CITYHALL_ID, THEATRE_ID, CITYHALL_NAME, CITYHALL_LOCATION " +
@@ -84,13 +83,20 @@ namespace KumariCinemas
                 txtCityhallId.Text       = "";
                 txtCityhallName.Text     = "";
                 txtCityhallLocation.Text = "";
-                lblMsg.Text = "Theater City Hall added successfully.";
                 BindGrid();
+                SetMessage("Theater City Hall added successfully.", true);
             }
             catch (Exception ex)
             {
-                lblMsg.Text = ex.Message;
+                SetMessage(ex.Message, false);
             }
+        }
+
+        protected void btnClear_Click(object sender, EventArgs e)
+        {
+            ResetForm();
+            lblMsg.Text = "";
+            lblMsg.CssClass = "kc-msg";
         }
 
         protected void gvTheaters_RowEditing(object sender, System.Web.UI.WebControls.GridViewEditEventArgs e)
@@ -130,10 +136,11 @@ namespace KumariCinemas
 
                 gvTheaters.EditIndex = -1;
                 BindGrid();
+                SetMessage("Theater City Hall updated successfully.", true);
             }
             catch (Exception ex)
             {
-                lblMsg.Text = ex.Message;
+                SetMessage(ex.Message, false);
             }
         }
 
@@ -154,11 +161,27 @@ namespace KumariCinemas
                 }
 
                 BindGrid();
+                SetMessage("Theater City Hall deleted successfully.", true);
             }
             catch (Exception ex)
             {
-                lblMsg.Text = ex.Message;
+                SetMessage(ex.Message, false);
             }
+        }
+
+        private void ResetForm()
+        {
+            txtCityhallId.Text = "";
+            txtCityhallName.Text = "";
+            txtCityhallLocation.Text = "";
+            if (ddlTheatreId.Items.Count > 0)
+                ddlTheatreId.SelectedIndex = 0;
+        }
+
+        private void SetMessage(string message, bool success)
+        {
+            lblMsg.Text = message;
+            lblMsg.CssClass = success ? "kc-msg kc-msg-success" : "kc-msg kc-msg-error";
         }
     }
 }

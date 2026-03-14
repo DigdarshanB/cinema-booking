@@ -14,6 +14,7 @@ namespace KumariCinemas
         protected global::System.Web.UI.WebControls.TextBox txtShowTime;
         protected global::System.Web.UI.WebControls.TextBox txtDayType;
         protected global::System.Web.UI.WebControls.Button btnAdd;
+        protected global::System.Web.UI.WebControls.Button btnClear;
         protected global::System.Web.UI.WebControls.GridView gvShows;
 
         private string Cs => ConfigurationManager.ConnectionStrings["OracleDb"].ConnectionString;
@@ -28,8 +29,6 @@ namespace KumariCinemas
 
         private void BindGrid()
         {
-            lblMsg.Text = "";
-
             string sql = "SELECT SHOW_ID, CITYHALL_ID, SHOW_DATE, SHOW_TIME, " +
                 "\"day_type \" AS DAY_TYPE FROM \"SHOW\" ORDER BY SHOW_ID";
 
@@ -71,13 +70,20 @@ namespace KumariCinemas
                 txtShowDate.Text   = "";
                 txtShowTime.Text   = "";
                 txtDayType.Text    = "";
-                lblMsg.Text = "Showtime added successfully.";
                 BindGrid();
+                SetMessage("Showtime added successfully.", true);
             }
             catch (Exception ex)
             {
-                lblMsg.Text = ex.Message;
+                SetMessage(ex.Message, false);
             }
+        }
+
+        protected void btnClear_Click(object sender, EventArgs e)
+        {
+            ResetForm();
+            lblMsg.Text = "";
+            lblMsg.CssClass = "kc-msg";
         }
 
         protected void gvShows_RowEditing(object sender, System.Web.UI.WebControls.GridViewEditEventArgs e)
@@ -122,10 +128,11 @@ namespace KumariCinemas
 
                 gvShows.EditIndex = -1;
                 BindGrid();
+                SetMessage("Showtime updated successfully.", true);
             }
             catch (Exception ex)
             {
-                lblMsg.Text = ex.Message;
+                SetMessage(ex.Message, false);
             }
         }
 
@@ -147,11 +154,27 @@ namespace KumariCinemas
                 }
 
                 BindGrid();
+                SetMessage("Showtime deleted successfully.", true);
             }
             catch (Exception ex)
             {
-                lblMsg.Text = ex.Message;
+                SetMessage(ex.Message, false);
             }
+        }
+
+        private void ResetForm()
+        {
+            txtShowId.Text = "";
+            txtCityhallId.Text = "";
+            txtShowDate.Text = "";
+            txtShowTime.Text = "";
+            txtDayType.Text = "";
+        }
+
+        private void SetMessage(string message, bool success)
+        {
+            lblMsg.Text = message;
+            lblMsg.CssClass = success ? "kc-msg kc-msg-success" : "kc-msg kc-msg-error";
         }
     }
 }

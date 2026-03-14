@@ -10,7 +10,10 @@ namespace KumariCinemas
         protected global::System.Web.UI.WebControls.Label lblMsg;
         protected global::System.Web.UI.WebControls.DropDownList ddlCustomer;
         protected global::System.Web.UI.WebControls.Button btnSearch;
+        protected global::System.Web.UI.WebControls.Button btnReset;
         protected global::System.Web.UI.WebControls.Panel pnlResults;
+        protected global::System.Web.UI.WebControls.Label lblSelectedCustomer;
+        protected global::System.Web.UI.WebControls.Label lblTicketCount;
         protected global::System.Web.UI.WebControls.Label lblCustomerId;
         protected global::System.Web.UI.WebControls.Label lblCustomerName;
         protected global::System.Web.UI.WebControls.Label lblContact;
@@ -25,6 +28,8 @@ namespace KumariCinemas
             if (!IsPostBack)
             {
                 BindCustomerDropDown();
+                lblSelectedCustomer.Text = "-";
+                lblTicketCount.Text = "0";
             }
         }
 
@@ -49,10 +54,11 @@ namespace KumariCinemas
         protected void btnSearch_Click(object sender, EventArgs e)
         {
             lblMsg.Text = "";
+            lblMsg.CssClass = "kc-msg";
 
             if (string.IsNullOrEmpty(ddlCustomer.SelectedValue))
             {
-                lblMsg.Text = "Please select a customer.";
+                SetMessage("Please select a customer.", false);
                 pnlResults.Visible = false;
                 return;
             }
@@ -61,6 +67,17 @@ namespace KumariCinemas
             LoadCustomerDetails(customerId);
             LoadTickets(customerId);
             pnlResults.Visible = true;
+        }
+
+        protected void btnReset_Click(object sender, EventArgs e)
+        {
+            if (ddlCustomer.Items.Count > 0)
+                ddlCustomer.SelectedIndex = 0;
+            pnlResults.Visible = false;
+            lblMsg.Text = "";
+            lblMsg.CssClass = "kc-msg";
+            lblSelectedCustomer.Text = "-";
+            lblTicketCount.Text = "0";
         }
 
         private void LoadCustomerDetails(string customerId)
@@ -85,6 +102,7 @@ namespace KumariCinemas
                     lblContact.Text      = r["CUSTOMER_CONTACT"].ToString();
                     lblUsername.Text     = r["USERNAME"].ToString();
                     lblAddress.Text      = r["ADDRESS"].ToString();
+                    lblSelectedCustomer.Text = lblCustomerName.Text;
                 }
             }
         }
@@ -116,10 +134,30 @@ namespace KumariCinemas
 
                 gvTickets.DataSource = dt;
                 gvTickets.DataBind();
+                lblTicketCount.Text = dt.Rows.Count.ToString();
 
                 if (dt.Rows.Count == 0)
-                    lblMsg.Text = "No tickets found for this customer in the last 6 months.";
+                    SetMessage("No tickets found for this customer in the last 6 months.", false);
+                else
+                    SetMessage("Ticket records loaded successfully.", true);
             }
+        }
+
+        protected string GetBookingStatusClass(object bookingStatus)
+        {
+            string value = bookingStatus == null ? "" : bookingStatus.ToString().Trim().ToLowerInvariant();
+
+            if (value == "paid") return "kc-status-badge kc-status-badge-success";
+            if (value == "pending") return "kc-status-badge kc-status-badge-warning";
+            if (value == "cancelled") return "kc-status-badge kc-status-badge-danger";
+
+            return "kc-status-badge";
+        }
+
+        private void SetMessage(string message, bool success)
+        {
+            lblMsg.Text = message;
+            lblMsg.CssClass = success ? "kc-msg kc-msg-success" : "kc-msg kc-msg-error";
         }
     }
 }

@@ -14,6 +14,7 @@ namespace KumariCinemas
         protected global::System.Web.UI.WebControls.TextBox txtUsername;
         protected global::System.Web.UI.WebControls.TextBox txtAddress;
         protected global::System.Web.UI.WebControls.Button btnAdd;
+        protected global::System.Web.UI.WebControls.Button btnClear;
         protected global::System.Web.UI.WebControls.GridView gvCustomers;
 
         private string Cs => ConfigurationManager.ConnectionStrings["OracleDb"].ConnectionString;
@@ -28,8 +29,6 @@ namespace KumariCinemas
 
         private void BindGrid()
         {
-            lblMsg.Text = "";
-
             using (var con = new OracleConnection(Cs))
             using (var cmd = new OracleCommand(
                 "SELECT CUSTOMER_ID, CUSTOMER_NAME, CUSTOMER_CONTACT, USERNAME, \"address \" AS ADDRESS " +
@@ -68,13 +67,20 @@ namespace KumariCinemas
                 txtContact.Text      = "";
                 txtUsername.Text     = "";
                 txtAddress.Text      = "";
-                lblMsg.Text = "Customer added successfully.";
                 BindGrid();
+                SetMessage("Customer added successfully.", true);
             }
             catch (Exception ex)
             {
-                lblMsg.Text = ex.Message;
+                SetMessage(ex.Message, false);
             }
+        }
+
+        protected void btnClear_Click(object sender, EventArgs e)
+        {
+            ResetForm();
+            lblMsg.Text = "";
+            lblMsg.CssClass = "kc-msg";
         }
 
         protected void gvCustomers_RowEditing(object sender, System.Web.UI.WebControls.GridViewEditEventArgs e)
@@ -116,10 +122,11 @@ namespace KumariCinemas
 
                 gvCustomers.EditIndex = -1;
                 BindGrid();
+                SetMessage("Customer updated successfully.", true);
             }
             catch (Exception ex)
             {
-                lblMsg.Text = ex.Message;
+                SetMessage(ex.Message, false);
             }
         }
 
@@ -140,11 +147,27 @@ namespace KumariCinemas
                 }
 
                 BindGrid();
+                SetMessage("Customer deleted successfully.", true);
             }
             catch (Exception ex)
             {
-                lblMsg.Text = ex.Message;
+                SetMessage(ex.Message, false);
             }
+        }
+
+        private void ResetForm()
+        {
+            txtCustomerId.Text   = "";
+            txtCustomerName.Text = "";
+            txtContact.Text      = "";
+            txtUsername.Text     = "";
+            txtAddress.Text      = "";
+        }
+
+        private void SetMessage(string message, bool success)
+        {
+            lblMsg.Text = message;
+            lblMsg.CssClass = success ? "kc-msg kc-msg-success" : "kc-msg kc-msg-error";
         }
     }
 }
