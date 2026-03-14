@@ -11,28 +11,30 @@
 
     <div class="kc-card">
         <h4><i class="bi bi-plus-circle"></i> Ticket Entry Form</h4>
-        <div class="row g-3 align-items-end">
+        <div class="row g-3 align-items-end kc-entry-row">
             <div class="col-md-6 col-xl-2">
                 <label class="form-label">Ticket ID</label>
                 <asp:TextBox ID="txtTicketId" runat="server" CssClass="form-control" placeholder="e.g. T001"></asp:TextBox>
-                <small class="text-muted d-block mt-1">Keep a unique ID for each ticket.</small>
             </div>
             <div class="col-md-6 col-xl-4">
                 <label class="form-label">Seat</label>
                 <asp:DropDownList ID="ddlSeatId" runat="server" CssClass="form-select"></asp:DropDownList>
-                <small class="text-muted d-block mt-1">Pick a seat number from the available list.</small>
             </div>
             <div class="col-md-6 col-xl-2">
                 <label class="form-label">Ticket Price</label>
                 <asp:TextBox ID="txtTicketPrice" runat="server" CssClass="form-control" placeholder="e.g. 12.50"></asp:TextBox>
-                <small class="text-muted d-block mt-1">Enter numeric value only.</small>
             </div>
-            <div class="col-md-6 col-xl-4">
-                <div class="kc-form-actions kc-form-actions-align">
+            <div class="col-md-6 col-xl-4 kc-entry-actions-col">
+                <div class="kc-form-actions kc-entry-actions">
                     <asp:Button ID="btnAdd" runat="server" Text="Add Ticket" CssClass="btn btn-kc-primary" OnClick="btnAdd_Click" />
                     <asp:Button ID="btnClear" runat="server" Text="Clear" CssClass="btn btn-kc-secondary" OnClick="btnClear_Click" CausesValidation="false" />
                 </div>
             </div>
+        </div>
+        <div class="row g-3 kc-entry-help-row">
+            <div class="col-md-6 col-xl-2"><small class="text-muted d-block">Keep a unique ID for each ticket.</small></div>
+            <div class="col-md-6 col-xl-4"><small class="text-muted d-block">Pick a seat number from the available list.</small></div>
+            <div class="col-md-6 col-xl-2"><small class="text-muted d-block">Enter numeric value only.</small></div>
         </div>
     </div>
 

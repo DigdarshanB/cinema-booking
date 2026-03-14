@@ -286,18 +286,19 @@ a:hover { color: var(--kc-accent-hover); text-decoration: none; }
     margin-left: 0;
 }
 
-.kc-form-actions.kc-form-actions-align {
+.kc-entry-row .kc-entry-actions {
     margin-top: 0;
 }
-@media (min-width: 1200px) {
-    .kc-form-actions.kc-form-actions-align {
-        align-items: center;
-        margin-bottom: 1.45rem;
-    }
+.kc-entry-help-row {
+    margin-top: .2rem;
 }
-@media (max-width: 1199.98px) {
-    .kc-form-actions.kc-form-actions-align {
-        margin-bottom: 0;
+.kc-entry-help-row small {
+    line-height: 1.3;
+}
+@media (min-width: 1200px) {
+    .kc-entry-row .kc-entry-actions-col {
+        display: flex;
+        align-items: flex-end;
     }
 }
 

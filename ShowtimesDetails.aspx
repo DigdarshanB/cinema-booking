@@ -11,38 +11,40 @@
 
     <div class="kc-card">
         <h4><i class="bi bi-calendar2-check"></i> Showtime Form</h4>
-        <div class="row g-3 align-items-end">
+        <div class="row g-3 align-items-end kc-entry-row">
             <div class="col-md-6 col-xl-2">
                 <label class="form-label">Show ID</label>
                 <asp:TextBox ID="txtShowId" runat="server" CssClass="form-control" placeholder="e.g. S001"></asp:TextBox>
-                <small class="text-muted d-block mt-1">Must be unique. Keep format like S001. Can be auto-generated later.</small>
             </div>
             <div class="col-md-6 col-xl-2">
                 <label class="form-label">City Hall ID</label>
                 <asp:TextBox ID="txtCityhallId" runat="server" CssClass="form-control" placeholder="e.g. CH001"></asp:TextBox>
-                <small class="text-muted d-block mt-1">Use an existing hall ID from theater records.</small>
             </div>
             <div class="col-md-6 col-xl-2">
                 <label class="form-label">Show Date</label>
                 <asp:TextBox ID="txtShowDate" runat="server" CssClass="form-control" TextMode="Date" placeholder="MM/DD/YYYY"></asp:TextBox>
-                <small class="text-muted d-block mt-1">Choose the screening date.</small>
             </div>
             <div class="col-md-6 col-xl-2">
                 <label class="form-label">Show Time</label>
                 <asp:TextBox ID="txtShowTime" runat="server" CssClass="form-control" TextMode="Time" placeholder="HH:MM"></asp:TextBox>
-                <small class="text-muted d-block mt-1">Use local cinema time slot.</small>
             </div>
             <div class="col-md-6 col-xl-2">
                 <label class="form-label">Day Type</label>
                 <asp:TextBox ID="txtDayType" runat="server" CssClass="form-control" placeholder="Weekday / Weekend"></asp:TextBox>
-                <small class="text-muted d-block mt-1">Example: Weekday, Weekend, Holiday.</small>
             </div>
-            <div class="col-md-12 col-xl-2">
-                <div class="kc-form-actions kc-form-actions-align">
+            <div class="col-md-12 col-xl-2 kc-entry-actions-col">
+                <div class="kc-form-actions kc-entry-actions">
                     <asp:Button ID="btnAdd" runat="server" Text="Add Showtime" CssClass="btn btn-kc-primary" OnClick="btnAdd_Click" />
                     <asp:Button ID="btnClear" runat="server" Text="Clear" CssClass="btn btn-kc-secondary" OnClick="btnClear_Click" CausesValidation="false" />
                 </div>
             </div>
+        </div>
+        <div class="row g-3 kc-entry-help-row">
+            <div class="col-md-6 col-xl-2"><small class="text-muted d-block">Must be unique. Keep format like S001. Can be auto-generated later.</small></div>
+            <div class="col-md-6 col-xl-2"><small class="text-muted d-block">Use an existing hall ID from theater records.</small></div>
+            <div class="col-md-6 col-xl-2"><small class="text-muted d-block">Choose the screening date.</small></div>
+            <div class="col-md-6 col-xl-2"><small class="text-muted d-block">Use local cinema time slot.</small></div>
+            <div class="col-md-6 col-xl-2"><small class="text-muted d-block">Example: Weekday, Weekend, Holiday.</small></div>
         </div>
     </div>
 
