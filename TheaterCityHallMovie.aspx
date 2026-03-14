@@ -11,17 +11,19 @@
 
     <div class="kc-card">
         <h4><i class="bi bi-funnel-fill"></i> City Hall Filter</h4>
-        <div class="row g-3 align-items-end">
+        <div class="row g-3 align-items-end kc-filter-row">
             <div class="col-md-8 col-lg-7">
                 <label class="form-label">Select City Hall</label>
                 <asp:DropDownList ID="ddlCityHall" runat="server" CssClass="form-select"></asp:DropDownList>
-                <small class="text-muted d-block mt-1">Select a city hall to load linked movies and scheduled shows.</small>
             </div>
             <div class="col-md-4 col-lg-5">
-                <div class="kc-form-actions">
+                <div class="kc-form-actions kc-filter-actions">
                     <asp:Button ID="btnSearch" runat="server" Text="Load Relationship" CssClass="btn btn-kc-primary" OnClick="btnSearch_Click" />
                     <asp:Button ID="btnReset" runat="server" Text="Reset" CssClass="btn btn-kc-secondary" OnClick="btnReset_Click" CausesValidation="false" />
                 </div>
+            </div>
+            <div class="col-md-8 col-lg-7">
+                <small class="text-muted d-block kc-filter-help">Select a city hall to load linked movies and scheduled shows.</small>
             </div>
         </div>
     </div>

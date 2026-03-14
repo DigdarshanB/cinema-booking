@@ -11,17 +11,19 @@
 
     <div class="kc-card">
         <h4><i class="bi bi-funnel-fill"></i> Analytics Filter</h4>
-        <div class="row g-3 align-items-end">
+        <div class="row g-3 align-items-end kc-filter-row">
             <div class="col-md-8 col-lg-7">
                 <label class="form-label">Select Movie</label>
                 <asp:DropDownList ID="ddlMovie" runat="server" CssClass="form-select"></asp:DropDownList>
-                <small class="text-muted d-block mt-1">Load occupancy insights for a single movie across city halls.</small>
             </div>
             <div class="col-md-4 col-lg-5">
-                <div class="kc-form-actions">
+                <div class="kc-form-actions kc-filter-actions">
                     <asp:Button ID="btnSearch" runat="server" Text="Load Analytics" CssClass="btn btn-kc-primary" OnClick="btnSearch_Click" />
                     <asp:Button ID="btnReset" runat="server" Text="Reset" CssClass="btn btn-kc-secondary" OnClick="btnReset_Click" CausesValidation="false" />
                 </div>
+            </div>
+            <div class="col-md-8 col-lg-7">
+                <small class="text-muted d-block kc-filter-help">Load occupancy insights for a single movie across city halls.</small>
             </div>
         </div>
     </div>

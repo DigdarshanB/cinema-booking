@@ -11,17 +11,19 @@
 
     <div class="kc-card">
         <h4><i class="bi bi-funnel-fill"></i> Filter by Customer</h4>
-        <div class="row g-3 align-items-end">
+        <div class="row g-3 align-items-end kc-filter-row">
             <div class="col-md-7 col-lg-6">
                 <label class="form-label">Select Customer</label>
                 <asp:DropDownList ID="ddlCustomer" runat="server" CssClass="form-select"></asp:DropDownList>
-                <small class="text-muted d-block mt-1">Choose a customer to load profile details and recent tickets.</small>
             </div>
             <div class="col-md-5 col-lg-6">
-                <div class="kc-form-actions">
+                <div class="kc-form-actions kc-filter-actions">
                     <asp:Button ID="btnSearch" runat="server" Text="Load Tickets" CssClass="btn btn-kc-primary" OnClick="btnSearch_Click" />
                     <asp:Button ID="btnReset" runat="server" Text="Reset" CssClass="btn btn-kc-secondary" OnClick="btnReset_Click" CausesValidation="false" />
                 </div>
+            </div>
+            <div class="col-md-7 col-lg-6">
+                <small class="text-muted d-block kc-filter-help">Choose a customer to load profile details and recent tickets.</small>
             </div>
         </div>
     </div>

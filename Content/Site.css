@@ -191,9 +191,9 @@ a:hover { color: var(--kc-accent-hover); text-decoration: none; }
 }
 .kc-card .table a:hover { background-color: #333 !important; color: #fff !important; border-color: #666 !important; }
 
-/* Edit (premium teal accent) */
-.kc-card .table a[href*="Edit$"] { background-color: transparent !important; border-color: #58b0b0 !important; color: #58b0b0 !important; }
-.kc-card .table a[href*="Edit$"]:hover { background-color: rgba(88, 176, 176, 0.12) !important; color: #6ac5c5 !important; border-color: #6ac5c5 !important; }
+/* Edit (modern orange outline) */
+.kc-card .table a[href*="Edit$"] { background-color: transparent !important; border-color: #F08C2B !important; color: #F08C2B !important; }
+.kc-card .table a[href*="Edit$"]:hover { background-color: rgba(240, 140, 43, 0.12) !important; color: #f2a048 !important; border-color: #f2a048 !important; }
 
 /* Delete (destructive solid red) */
 .kc-card .table a[href*="Delete"] { background-color: #8b0000 !important; color: #fff !important; border-color: #8b0000 !important; }
@@ -284,6 +284,35 @@ a:hover { color: var(--kc-accent-hover); text-decoration: none; }
 }
 .kc-form-actions .btn + .btn {
     margin-left: 0;
+}
+
+.kc-form-actions.kc-form-actions-align {
+    margin-top: 0;
+}
+@media (min-width: 1200px) {
+    .kc-form-actions.kc-form-actions-align {
+        align-items: center;
+        margin-bottom: 1.45rem;
+    }
+}
+@media (max-width: 1199.98px) {
+    .kc-form-actions.kc-form-actions-align {
+        margin-bottom: 0;
+    }
+}
+
+.kc-filter-row .kc-filter-actions {
+    margin-top: 0;
+}
+.kc-filter-row .kc-filter-help {
+    margin-top: -.15rem;
+}
+@media (min-width: 768px) {
+    .kc-filter-row .kc-filter-actions {
+        justify-content: flex-end;
+        align-items: center;
+        height: 100%;
+    }
 }
 
 .kc-status-badge {

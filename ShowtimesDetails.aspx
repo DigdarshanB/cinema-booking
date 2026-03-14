@@ -38,7 +38,7 @@
                 <small class="text-muted d-block mt-1">Example: Weekday, Weekend, Holiday.</small>
             </div>
             <div class="col-md-12 col-xl-2">
-                <div class="kc-form-actions">
+                <div class="kc-form-actions kc-form-actions-align">
                     <asp:Button ID="btnAdd" runat="server" Text="Add Showtime" CssClass="btn btn-kc-primary" OnClick="btnAdd_Click" />
                     <asp:Button ID="btnClear" runat="server" Text="Clear" CssClass="btn btn-kc-secondary" OnClick="btnClear_Click" CausesValidation="false" />
                 </div>

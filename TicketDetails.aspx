@@ -28,7 +28,7 @@
                 <small class="text-muted d-block mt-1">Enter numeric value only.</small>
             </div>
             <div class="col-md-6 col-xl-4">
-                <div class="kc-form-actions">
+                <div class="kc-form-actions kc-form-actions-align">
                     <asp:Button ID="btnAdd" runat="server" Text="Add Ticket" CssClass="btn btn-kc-primary" OnClick="btnAdd_Click" />
                     <asp:Button ID="btnClear" runat="server" Text="Clear" CssClass="btn btn-kc-secondary" OnClick="btnClear_Click" CausesValidation="false" />
                 </div>
