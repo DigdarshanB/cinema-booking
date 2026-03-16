@@ -1,4 +1,4 @@
-<%@ Page Title="Movie Theater CityHall Occupancy" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="MovieTheatherCityHallOccupancyPerformer.aspx.cs" Inherits="KumariCinemas.MovieTheatherCityHallOccupancyPerformer" %>
+<%@ Page Title="Movie Theater CityHall Occupancy" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="MovieTheatherCityHallOccupancyPerformer.aspx.cs" Inherits="KumariCinemas.MovieTheatherCityHallOccupancyPerformer" MaintainScrollPositionOnPostBack="true" %>
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
 
@@ -6,8 +6,6 @@
         <h2><i class="bi bi-graph-up-arrow"></i> Occupancy Analytics Dashboard</h2>
         <p>Analyze paid-ticket occupancy performance by movie and compare top city hall performers.</p>
     </div>
-
-    <asp:Label ID="lblMsg" runat="server" CssClass="kc-msg" />
 
     <div class="kc-card">
         <h4><i class="bi bi-funnel-fill"></i> Analytics Filter</h4>
@@ -28,6 +26,8 @@
         </div>
     </div>
 
+    <asp:Label ID="lblMsg" runat="server" CssClass="kc-msg" />
+
     <asp:Panel ID="pnlResults" runat="server" Visible="false">
 
         <div class="row g-3 mb-3">
@@ -45,7 +45,7 @@
             </div>
             <div class="col-md-4">
                 <div class="kc-kpi-card">
-                    <p>Average Occupancy</p>
+                    <p>Average Occupancy (Top 3)</p>
                     <h3><asp:Label ID="lblAvgOccupancy" runat="server" /></h3>
                 </div>
             </div>
@@ -62,7 +62,7 @@
         </div>
 
         <div class="kc-card">
-            <h4><i class="bi bi-bar-chart-fill"></i> Top 3 City Halls by Paid-Ticket Occupancy</h4>
+            <h4><i class="bi bi-bar-chart-fill"></i> Top 3 City Halls by Paid Seat Occupancy</h4>
             <div class="table-responsive">
                 <asp:GridView ID="gvOccupancy" runat="server"
                     AutoGenerateColumns="False"
@@ -72,8 +72,8 @@
                         <asp:BoundField DataField="CITYHALL_ID"       HeaderText="City Hall ID" />
                         <asp:BoundField DataField="CITYHALL_NAME"     HeaderText="Name" />
                         <asp:BoundField DataField="CITYHALL_LOCATION" HeaderText="Location" />
-                        <asp:BoundField DataField="TOTAL_SEATS"       HeaderText="Total Seats" />
-                        <asp:BoundField DataField="PAID_TICKETS"      HeaderText="Paid Tickets" />
+                        <asp:BoundField DataField="TOTAL_SEATS"       HeaderText="Mapped Show Seats" />
+                        <asp:BoundField DataField="PAID_TICKETS"      HeaderText="Paid Occupied Seats" />
                         <asp:TemplateField HeaderText="Occupancy %">
                             <ItemTemplate>
                                 <span class='<%# GetOccupancyClass(Eval("OCCUPANCY_PCT")) %>'><%# Eval("OCCUPANCY_PCT") %>%</span>

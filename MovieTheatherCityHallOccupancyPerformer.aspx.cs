@@ -32,19 +32,28 @@ namespace KumariCinemas
 
         private void BindMovieDropDown()
         {
-            using (var con = new OracleConnection(Cs))
-            using (var cmd = new OracleCommand(
-                "SELECT MOVIE_ID, MOVIE_TITLE FROM MOVIE ORDER BY MOVIE_TITLE", con))
-            using (var da = new OracleDataAdapter(cmd))
+            try
             {
-                var dt = new DataTable();
-                da.Fill(dt);
+                using (var con = new OracleConnection(Cs))
+                using (var cmd = new OracleCommand(
+                    "SELECT MOVIE_ID, MOVIE_TITLE FROM MOVIE ORDER BY MOVIE_TITLE", con))
+                using (var da = new OracleDataAdapter(cmd))
+                {
+                    var dt = new DataTable();
+                    da.Fill(dt);
 
-                ddlMovie.DataSource     = dt;
-                ddlMovie.DataTextField  = "MOVIE_TITLE";
-                ddlMovie.DataValueField = "MOVIE_ID";
-                ddlMovie.DataBind();
+                    ddlMovie.DataSource = dt;
+                    ddlMovie.DataTextField = "MOVIE_TITLE";
+                    ddlMovie.DataValueField = "MOVIE_ID";
+                    ddlMovie.DataBind();
+                    ddlMovie.Items.Insert(0, new System.Web.UI.WebControls.ListItem("-- Select Movie --", ""));
+                }
+            }
+            catch
+            {
+                ddlMovie.Items.Clear();
                 ddlMovie.Items.Insert(0, new System.Web.UI.WebControls.ListItem("-- Select Movie --", ""));
+                SetMessage("Unable to load movie list right now.", false);
             }
         }
 
@@ -60,8 +69,17 @@ namespace KumariCinemas
                 return;
             }
 
-            LoadOccupancy(ddlMovie.SelectedValue);
-            pnlResults.Visible = true;
+            try
+            {
+                LoadOccupancy(ddlMovie.SelectedValue);
+                pnlResults.Visible = true;
+            }
+            catch
+            {
+                ResetResultState();
+                pnlResults.Visible = false;
+                SetMessage("Unable to load occupancy analytics right now.", false);
+            }
         }
 
         protected void btnReset_Click(object sender, EventArgs e)
@@ -82,19 +100,23 @@ namespace KumariCinemas
             string sql =
                 "SELECT * FROM ( " +
                 "SELECT tch.CITYHALL_ID, tch.CITYHALL_NAME, tch.CITYHALL_LOCATION, " +
-                "COUNT(DISTINCT ss.SEAT_ID) AS TOTAL_SEATS, " +
-                "COUNT(DISTINCT CASE WHEN p.PAYMENT_STATUS = 'Paid' THEN bt.TICKET_ID END) AS PAID_TICKETS, " +
-                "ROUND(COUNT(DISTINCT CASE WHEN p.PAYMENT_STATUS = 'Paid' THEN bt.TICKET_ID END) " +
-                "* 100.0 / NULLIF(COUNT(DISTINCT ss.SEAT_ID), 0), 2) AS OCCUPANCY_PCT " +
-                "FROM \"Movie-Show\" ms " +
-                "JOIN \"SHOW\" s ON ms.SHOW_ID = s.SHOW_ID " +
-                "JOIN THEATRECITYHALL tch ON s.CITYHALL_ID = tch.CITYHALL_ID " +
-                "LEFT JOIN \"Show-Seat\" ss ON s.SHOW_ID = ss.SHOW_ID " +
+                "COUNT(DISTINCT (s.SHOW_ID || '-' || ss.SEAT_ID)) AS TOTAL_SEATS, " +
+                "COUNT(DISTINCT CASE " +
+                "    WHEN UPPER(p.PAYMENT_STATUS) = 'PAID' AND ss_paid.SEAT_ID IS NOT NULL " +
+                "    THEN (s.SHOW_ID || '-' || t.SEAT_ID) " +
+                "END) AS PAID_TICKETS, " +
+                "ROUND(COUNT(DISTINCT CASE " +
+                "    WHEN UPPER(p.PAYMENT_STATUS) = 'PAID' AND ss_paid.SEAT_ID IS NOT NULL " +
+                "    THEN (s.SHOW_ID || '-' || t.SEAT_ID) " +
+                "END) * 100.0 / NULLIF(COUNT(DISTINCT (s.SHOW_ID || '-' || ss.SEAT_ID)), 0), 2) AS OCCUPANCY_PCT " +
+                "FROM \"SHOW\" s " +
+                "JOIN THEATRE_CITY_HALL tch ON s.CITYHALL_ID = tch.CITYHALL_ID " +
+                "LEFT JOIN SHOW_SEAT ss ON s.SHOW_ID = ss.SHOW_ID " +
                 "LEFT JOIN BOOKING b ON s.SHOW_ID = b.SHOW_ID " +
-                "LEFT JOIN \"Booking-Ticket\" bt ON b.BOOKING_ID = bt.BOOKING_ID " +
-                "LEFT JOIN \"Booking-Payment\" bp ON b.BOOKING_ID = bp.BOOKING_ID " +
-                "LEFT JOIN PAYMENT p ON bp.PAYMENT_ID = p.PAYMENT_ID " +
-                "WHERE ms.MOVIE_ID = :pMovieId " +
+                "LEFT JOIN PAYMENT p ON b.BOOKING_ID = p.BOOKING_ID " +
+                "LEFT JOIN TICKET t ON b.BOOKING_ID = t.BOOKING_ID " +
+                "LEFT JOIN SHOW_SEAT ss_paid ON ss_paid.SHOW_ID = s.SHOW_ID AND ss_paid.SEAT_ID = t.SEAT_ID " +
+                "WHERE s.MOVIE_ID = :pMovieId " +
                 "GROUP BY tch.CITYHALL_ID, tch.CITYHALL_NAME, tch.CITYHALL_LOCATION " +
                 "ORDER BY OCCUPANCY_PCT DESC " +
                 ") WHERE ROWNUM <= 3";
@@ -132,8 +154,61 @@ namespace KumariCinemas
                 decimal avg = total / dt.Rows.Count;
                 lblTopOccupancy.Text = top.ToString("0.##") + "%";
                 lblAvgOccupancy.Text = avg.ToString("0.##") + "%";
-                SetMessage("Occupancy analytics loaded successfully.", true);
+
+                int mappedShowSeats = GetMovieShowSeatCount(movieId);
+                int paidTickets = GetMoviePaidTicketCount(movieId);
+
+                if (mappedShowSeats == 0)
+                    SetMessage("No show-seat mappings found for this movie. Add SHOW_SEAT rows to get meaningful occupancy.", false);
+                else if (paidTickets == 0)
+                    SetMessage("No paid tickets found for this movie yet. Occupancy is based on paid tickets only.", false);
+                else
+                    SetMessage("Paid seat occupancy analytics loaded successfully.", true);
             }
+        }
+
+        private int GetMovieShowSeatCount(string movieId)
+        {
+            using (var con = new OracleConnection(Cs))
+            using (var cmd = new OracleCommand(
+                "SELECT COUNT(DISTINCT (s.SHOW_ID || '-' || ss.SEAT_ID)) " +
+                "FROM \"SHOW\" s " +
+                "JOIN SHOW_SEAT ss ON s.SHOW_ID = ss.SHOW_ID " +
+                "WHERE s.MOVIE_ID = :pMovieId", con))
+            {
+                cmd.Parameters.Add(":pMovieId", OracleDbType.Varchar2).Value = movieId;
+                con.Open();
+                object result = cmd.ExecuteScalar();
+                return result == null || result == DBNull.Value ? 0 : Convert.ToInt32(result);
+            }
+        }
+
+        private int GetMoviePaidTicketCount(string movieId)
+        {
+            using (var con = new OracleConnection(Cs))
+            using (var cmd = new OracleCommand(
+                "SELECT COUNT(DISTINCT (s.SHOW_ID || '-' || t.SEAT_ID)) " +
+                "FROM \"SHOW\" s " +
+                "JOIN BOOKING b ON s.SHOW_ID = b.SHOW_ID " +
+                "JOIN PAYMENT p ON b.BOOKING_ID = p.BOOKING_ID " +
+                "JOIN TICKET t ON b.BOOKING_ID = t.BOOKING_ID " +
+                "JOIN SHOW_SEAT ss ON s.SHOW_ID = ss.SHOW_ID AND t.SEAT_ID = ss.SEAT_ID " +
+                "WHERE s.MOVIE_ID = :pMovieId AND UPPER(p.PAYMENT_STATUS) = 'PAID'", con))
+            {
+                cmd.Parameters.Add(":pMovieId", OracleDbType.Varchar2).Value = movieId;
+                con.Open();
+                object result = cmd.ExecuteScalar();
+                return result == null || result == DBNull.Value ? 0 : Convert.ToInt32(result);
+            }
+        }
+
+        private void ResetResultState()
+        {
+            lblSelectedMovie.Text = "-";
+            lblTopOccupancy.Text = "0%";
+            lblAvgOccupancy.Text = "0%";
+            gvOccupancy.DataSource = null;
+            gvOccupancy.DataBind();
         }
 
         protected string GetOccupancyClass(object occupancyValue)

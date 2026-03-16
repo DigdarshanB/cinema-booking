@@ -1,128 +1,97 @@
-KumariCinemas database notes
+KumariCinemas database schema (final)
 
-Main tables
+Tables (12)
 
 CUSTOMER
-- customer_id (PK)
-- customer_name
-- customer_contact
-- username
-- address
+- CUSTOMER_ID (PK)
+- CUSTOMER_NAME
+- CUSTOMER_CONTACT
+- USERNAME
+- ADDRESS
 
 THEATRE
-- theatre_id (PK)
-- theatre_name
+- THEATRE_ID (PK)
+- THEATRE_NAME
 
-THEATRECITYHALL
-- cityhall_id (PK)
-- theatre_id (FK to THEATRE)
-- cityhall_name
-- cityhall_location
+THEATRE_CITY_HALL
+- CITYHALL_ID (PK)
+- THEATRE_ID (FK -> THEATRE.THEATRE_ID)
+- CITYHALL_NAME
+- CITYHALL_LOCATION
 
 MOVIE
-- movie_id (PK)
-- movie_title
-- duration
-- movie_language
-- movie_genre
-- release_date
-
-SHOW
-- show_id (PK)
-- cityhall_id (FK to THEATRECITYHALL)
-- show_date
-- show_time
-- day_type
-
-SHOW_PRICE
-- pricing_id (PK)
-- show_id (FK to SHOW)
-- show_price
-- pricing_reason
-
-SEAT
-- seat_id (PK)
-- seat_no
-- seat_status
-
-BOOKING
-- booking_id (PK)
-- show_id (FK to SHOW)
-- booking_status
-
-PAYMENT
-- payment_id (PK)
-- payment_status
-- payment_amount
-
-TICKET
-- ticket_id (PK)
-- seat_id (FK to SEAT)
-- ticket_price
-
-Bridge tables
-
-CUSTOMER_THEATRE
-- customer_id
-- theatre_id
+- MOVIE_ID (PK)
+- MOVIE_TITLE
+- DURATION
+- MOVIE_LANGUAGE
+- MOVIE_GENRE
+- RELEASE_DATE
 
 CITYHALL_MOVIE
-- cityhall_id
-- movie_id
+- CITYHALL_ID (FK -> THEATRE_CITY_HALL.CITYHALL_ID)
+- MOVIE_ID (FK -> MOVIE.MOVIE_ID)
 
-MOVIE_SHOW
-- movie_id
-- show_id
+SHOW
+- SHOW_ID (PK)
+- CITYHALL_ID (FK -> THEATRE_CITY_HALL.CITYHALL_ID)
+- MOVIE_ID (FK -> MOVIE.MOVIE_ID)
+- SHOW_DATE
+- SHOW_TIME
+
+SHOW_PRICE
+- PRICING_ID (PK)
+- SHOW_ID (FK -> SHOW.SHOW_ID)
+- SHOW_PRICE
+- PRICING_REASON
+
+SEAT
+- SEAT_ID (PK)
+- CITYHALL_ID (FK -> THEATRE_CITY_HALL.CITYHALL_ID)
+- SEAT_NO
+- SEAT_STATUS
 
 SHOW_SEAT
-- show_id
-- seat_id
+- SHOW_ID (FK -> SHOW.SHOW_ID)
+- SEAT_ID (FK -> SEAT.SEAT_ID)
 
-CUSTOMER_BOOKING
-- customer_id
-- booking_id
+BOOKING
+- BOOKING_ID (PK)
+- CUSTOMER_ID (FK -> CUSTOMER.CUSTOMER_ID)
+- SHOW_ID (FK -> SHOW.SHOW_ID)
+- BOOKING_STATUS
 
-BOOKING_PAYMENT
-- booking_id
-- payment_id
+PAYMENT
+- PAYMENT_ID (PK)
+- BOOKING_ID (FK -> BOOKING.BOOKING_ID)
+- PAYMENT_STATUS
+- PAYMENT_AMOUNT
 
-BOOKING_TICKET
-- booking_id
-- ticket_id
+TICKET
+- TICKET_ID (PK)
+- BOOKING_ID (FK -> BOOKING.BOOKING_ID)
+- SEAT_ID (FK -> SEAT.SEAT_ID)
+- TICKET_PRICE
 
-Important relationship notes
+Relationship rules
 
-- One theatre can have many city halls
-- One city hall belongs to one theatre
-- One city hall can have many shows
-- One show belongs to one city hall
-- A movie and show are linked through MOVIE_SHOW
-- A customer and booking are linked through CUSTOMER_BOOKING
-- A booking and payment are linked through BOOKING_PAYMENT
-- A booking and ticket are linked through BOOKING_TICKET
-- A show and seat are linked through SHOW_SEAT
+- One THEATRE has many THEATRE_CITY_HALL.
+- One THEATRE_CITY_HALL has many SHOW.
+- One THEATRE_CITY_HALL has many SEAT.
+- One THEATRE_CITY_HALL can show many MOVIE rows through CITYHALL_MOVIE.
+- One MOVIE has many SHOW.
+- One SHOW has many SEAT through SHOW_SEAT.
+- One CUSTOMER has many BOOKING.
+- One BOOKING belongs to one CUSTOMER.
+- One BOOKING belongs to one SHOW.
+- One PAYMENT belongs to one BOOKING.
+- One TICKET belongs to one BOOKING and one SEAT.
 
-Page mapping for this project
+Critical direct foreign keys
 
-UserDetails.aspx -> CUSTOMER
-TheaterCityHallDetails.aspx -> THEATRECITYHALL
-MovieDetails.aspx -> MOVIE
-ShowtimesDetails.aspx -> SHOW
-TicketDetails.aspx -> TICKET
-
-Complex forms will need joins:
-UserTicket.aspx
-TheaterCityHallMovie.aspx
-MovieTheatherCityHallOccupancyPerformer.aspx
-
-Oracle note
-
-Some bridge table names in Oracle may have hyphens and quotes, like:
-"Customer-Theatre"
-"CityHall-Movie"
-"Movie-Show"
-"Show-Seat"
-"Customer-Booking"
-"Booking-Payment"
-"Booking-Ticket"
+- BOOKING.CUSTOMER_ID
+- BOOKING.SHOW_ID
+- PAYMENT.BOOKING_ID
+- TICKET.BOOKING_ID
+- SHOW.MOVIE_ID
+- SEAT.CITYHALL_ID
 

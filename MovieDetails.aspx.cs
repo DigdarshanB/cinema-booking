@@ -2,6 +2,7 @@ using Oracle.ManagedDataAccess.Client;
 using System;
 using System.Configuration;
 using System.Data;
+using System.Globalization;
 
 namespace KumariCinemas
 {
@@ -33,7 +34,7 @@ namespace KumariCinemas
             using (var con = new OracleConnection(Cs))
             using (var cmd = new OracleCommand(
                 "SELECT MOVIE_ID, MOVIE_TITLE, DURATION, MOVIE_LANGUAGE, MOVIE_GENRE, " +
-                "\"release_date \" AS RELEASE_DATE FROM MOVIE ORDER BY MOVIE_ID", con))
+                "RELEASE_DATE FROM MOVIE ORDER BY MOVIE_ID", con))
             using (var da = new OracleDataAdapter(cmd))
             {
                 var dt = new DataTable();
@@ -67,18 +68,35 @@ namespace KumariCinemas
         {
             try
             {
+                string validationMessage;
+                decimal parsedDuration;
+                DateTime parsedReleaseDate;
+                if (!TryValidateMovieInput(
+                    txtMovieId.Text,
+                    txtMovieTitle.Text,
+                    txtDuration.Text,
+                    txtLanguage.Text,
+                    txtGenre.Text,
+                    txtReleaseDate.Text,
+                    out parsedDuration,
+                    out parsedReleaseDate,
+                    out validationMessage))
+                {
+                    SetMessage(validationMessage, false);
+                    return;
+                }
+
                 using (var con = new OracleConnection(Cs))
                 using (var cmd = new OracleCommand(
-                    "INSERT INTO MOVIE (MOVIE_ID, MOVIE_TITLE, DURATION, MOVIE_LANGUAGE, MOVIE_GENRE, \"release_date \") " +
-                    "VALUES (:pId, :pTitle, TO_DATE(:pDuration, 'MM/DD/YYYY HH:MI:SS AM'), :pLanguage, :pGenre, " +
-                    "TO_DATE(:pReleaseDate, 'MM/DD/YYYY HH:MI:SS AM'))", con))
+                    "INSERT INTO MOVIE (MOVIE_ID, MOVIE_TITLE, DURATION, MOVIE_LANGUAGE, MOVIE_GENRE, RELEASE_DATE) " +
+                    "VALUES (:pId, :pTitle, :pDuration, :pLanguage, :pGenre, :pReleaseDate)", con))
                 {
                     cmd.Parameters.Add(":pId",          OracleDbType.Varchar2).Value = txtMovieId.Text.Trim();
                     cmd.Parameters.Add(":pTitle",       OracleDbType.Varchar2).Value = txtMovieTitle.Text.Trim();
-                    cmd.Parameters.Add(":pDuration",    OracleDbType.Varchar2).Value = txtDuration.Text.Trim();
+                    cmd.Parameters.Add(":pDuration",    OracleDbType.Decimal).Value = parsedDuration;
                     cmd.Parameters.Add(":pLanguage",    OracleDbType.Varchar2).Value = txtLanguage.Text.Trim();
                     cmd.Parameters.Add(":pGenre",       OracleDbType.Varchar2).Value = txtGenre.Text.Trim();
-                    cmd.Parameters.Add(":pReleaseDate", OracleDbType.Varchar2).Value = txtReleaseDate.Text.Trim();
+                    cmd.Parameters.Add(":pReleaseDate", OracleDbType.Date).Value = parsedReleaseDate.Date;
 
                     con.Open();
                     cmd.ExecuteNonQuery();
@@ -93,9 +111,13 @@ namespace KumariCinemas
                 BindGrid();
                 SetMessage("Movie added successfully.", true);
             }
+            catch (OracleException ex) when (ex.Number == 1)
+            {
+                SetMessage("Movie ID already exists. Please use a unique Movie ID.", false);
+            }
             catch (Exception ex)
             {
-                SetMessage(ex.Message, false);
+                SetMessage("Unable to add movie. Please verify the provided values.", false);
             }
         }
 
@@ -129,18 +151,36 @@ namespace KumariCinemas
                 string genre       = e.NewValues["MOVIE_GENRE"]?.ToString()    ?? "";
                 string releaseDate = e.NewValues["RELEASE_DATE"]?.ToString()   ?? "";
 
+                string validationMessage;
+                decimal parsedDuration;
+                DateTime parsedReleaseDate;
+                if (!TryValidateMovieInput(
+                    id,
+                    title,
+                    duration,
+                    language,
+                    genre,
+                    releaseDate,
+                    out parsedDuration,
+                    out parsedReleaseDate,
+                    out validationMessage))
+                {
+                    SetMessage(validationMessage, false);
+                    return;
+                }
+
                 using (var con = new OracleConnection(Cs))
                 using (var cmd = new OracleCommand(
                     "UPDATE MOVIE SET MOVIE_TITLE = :pTitle, " +
-                    "DURATION = TO_DATE(:pDuration, 'MM/DD/YYYY HH:MI:SS AM'), " +
+                    "DURATION = :pDuration, " +
                     "MOVIE_LANGUAGE = :pLanguage, MOVIE_GENRE = :pGenre, " +
-                    "\"release_date \" = TO_DATE(:pReleaseDate, 'MM/DD/YYYY HH:MI:SS AM') WHERE MOVIE_ID = :pId", con))
+                    "RELEASE_DATE = :pReleaseDate WHERE MOVIE_ID = :pId", con))
                 {
                     cmd.Parameters.Add(":pTitle",       OracleDbType.Varchar2).Value = title.Trim();
-                    cmd.Parameters.Add(":pDuration",    OracleDbType.Varchar2).Value = duration.Trim();
+                    cmd.Parameters.Add(":pDuration",    OracleDbType.Decimal).Value = parsedDuration;
                     cmd.Parameters.Add(":pLanguage",    OracleDbType.Varchar2).Value = language.Trim();
                     cmd.Parameters.Add(":pGenre",       OracleDbType.Varchar2).Value = genre.Trim();
-                    cmd.Parameters.Add(":pReleaseDate", OracleDbType.Varchar2).Value = releaseDate.Trim();
+                    cmd.Parameters.Add(":pReleaseDate", OracleDbType.Date).Value = parsedReleaseDate.Date;
                     cmd.Parameters.Add(":pId",          OracleDbType.Varchar2).Value = id;
 
                     con.Open();
@@ -153,7 +193,7 @@ namespace KumariCinemas
             }
             catch (Exception ex)
             {
-                SetMessage(ex.Message, false);
+                SetMessage("Unable to update movie. Please verify the provided values.", false);
             }
         }
 
@@ -176,9 +216,13 @@ namespace KumariCinemas
                 BindGrid();
                 SetMessage("Movie deleted successfully.", true);
             }
+            catch (OracleException ex) when (ex.Number == 2292)
+            {
+                SetMessage("Cannot delete this movie because related records exist.", false);
+            }
             catch (Exception ex)
             {
-                SetMessage(ex.Message, false);
+                SetMessage("Unable to delete movie.", false);
             }
         }
 
@@ -196,6 +240,56 @@ namespace KumariCinemas
         {
             lblMsg.Text = message;
             lblMsg.CssClass = success ? "kc-msg kc-msg-success" : "kc-msg kc-msg-error";
+        }
+
+        private bool TryValidateMovieInput(
+            string movieId,
+            string title,
+            string duration,
+            string language,
+            string genre,
+            string releaseDate,
+            out decimal parsedDuration,
+            out DateTime parsedReleaseDate,
+            out string message)
+        {
+            parsedDuration = 0m;
+            parsedReleaseDate = DateTime.MinValue;
+            message = "";
+
+            if (string.IsNullOrWhiteSpace(movieId) ||
+                string.IsNullOrWhiteSpace(title) ||
+                string.IsNullOrWhiteSpace(duration) ||
+                string.IsNullOrWhiteSpace(language) ||
+                string.IsNullOrWhiteSpace(genre) ||
+                string.IsNullOrWhiteSpace(releaseDate))
+            {
+                message = "Please fill all required fields.";
+                return false;
+            }
+
+            if (!decimal.TryParse(duration.Trim(), NumberStyles.Number, CultureInfo.InvariantCulture, out parsedDuration) &&
+                !decimal.TryParse(duration.Trim(), NumberStyles.Number, CultureInfo.CurrentCulture, out parsedDuration))
+            {
+                message = "Duration must be a valid number.";
+                return false;
+            }
+
+            if (parsedDuration <= 0 || parsedDuration > 600)
+            {
+                message = "Duration must be greater than 0 and no more than 600 minutes.";
+                return false;
+            }
+
+            if (!DateTime.TryParseExact(releaseDate.Trim(), "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out parsedReleaseDate) &&
+                !DateTime.TryParse(releaseDate.Trim(), CultureInfo.CurrentCulture, DateTimeStyles.None, out parsedReleaseDate) &&
+                !DateTime.TryParse(releaseDate.Trim(), CultureInfo.InvariantCulture, DateTimeStyles.None, out parsedReleaseDate))
+            {
+                message = "Release Date must be a valid date.";
+                return false;
+            }
+
+            return true;
         }
     }
 }

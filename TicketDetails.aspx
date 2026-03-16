@@ -1,4 +1,4 @@
-<%@ Page Title="Ticket Details" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="TicketDetails.aspx.cs" Inherits="KumariCinemas.TicketDetails" %>
+<%@ Page Title="Ticket Details" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="TicketDetails.aspx.cs" Inherits="KumariCinemas.TicketDetails" MaintainScrollPositionOnPostBack="true" %>
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
 
@@ -7,14 +7,20 @@
         <p>Issue and maintain ticket records with clear seat mapping and pricing controls.</p>
     </div>
 
-    <asp:Label ID="lblMsg" runat="server" CssClass="kc-msg" />
-
     <div class="kc-card">
         <h4><i class="bi bi-plus-circle"></i> Ticket Entry Form</h4>
         <div class="row g-3 align-items-end kc-entry-row">
             <div class="col-md-6 col-xl-2">
+                <label class="form-label">Customer ID</label>
+                <asp:DropDownList ID="ddlCustomerId" runat="server" CssClass="form-select" AutoPostBack="true" OnSelectedIndexChanged="ddlCustomerId_SelectedIndexChanged"></asp:DropDownList>
+            </div>
+            <div class="col-md-6 col-xl-2">
                 <label class="form-label">Ticket ID</label>
                 <asp:TextBox ID="txtTicketId" runat="server" CssClass="form-control" placeholder="e.g. T001"></asp:TextBox>
+            </div>
+            <div class="col-md-6 col-xl-4">
+                <label class="form-label">Booking</label>
+                <asp:DropDownList ID="ddlBookingId" runat="server" CssClass="form-select" AutoPostBack="true" OnSelectedIndexChanged="ddlBookingId_SelectedIndexChanged"></asp:DropDownList>
             </div>
             <div class="col-md-6 col-xl-4">
                 <label class="form-label">Seat</label>
@@ -33,10 +39,12 @@
         </div>
         <div class="row g-3 kc-entry-help-row">
             <div class="col-md-6 col-xl-2"><small class="text-muted d-block">Keep a unique ID for each ticket.</small></div>
-            <div class="col-md-6 col-xl-4"><small class="text-muted d-block">Pick a seat number from the available list.</small></div>
+            <div class="col-md-6 col-xl-4"><small class="text-muted d-block">Choose a customer first, then booking and seat options will load.</small></div>
             <div class="col-md-6 col-xl-2"><small class="text-muted d-block">Enter numeric value only.</small></div>
         </div>
     </div>
+
+    <asp:Label ID="lblMsg" runat="server" CssClass="kc-msg" />
 
     <div class="kc-card">
         <h4><i class="bi bi-table"></i> Ticket Records</h4>
@@ -49,10 +57,27 @@
                 OnRowEditing="gvTickets_RowEditing"
                 OnRowCancelingEdit="gvTickets_RowCancelingEdit"
                 OnRowUpdating="gvTickets_RowUpdating"
-                OnRowDeleting="gvTickets_RowDeleting">
+                OnRowDeleting="gvTickets_RowDeleting"
+                OnRowDataBound="gvTickets_RowDataBound">
                 <Columns>
+                    <asp:BoundField DataField="CUSTOMER_ID"  HeaderText="Customer ID" ReadOnly="True" />
                     <asp:BoundField DataField="TICKET_ID"    HeaderText="Ticket ID" ReadOnly="True" />
-                    <asp:BoundField DataField="SEAT_ID"      HeaderText="Seat ID" />
+                    <asp:TemplateField HeaderText="Booking ID">
+                        <ItemTemplate>
+                            <%# Eval("BOOKING_ID") %>
+                        </ItemTemplate>
+                        <EditItemTemplate>
+                            <asp:DropDownList ID="ddlEditBookingId" runat="server" CssClass="form-select" AutoPostBack="true" OnSelectedIndexChanged="ddlEditBookingId_SelectedIndexChanged"></asp:DropDownList>
+                        </EditItemTemplate>
+                    </asp:TemplateField>
+                    <asp:TemplateField HeaderText="Seat ID">
+                        <ItemTemplate>
+                            <%# Eval("SEAT_ID") %>
+                        </ItemTemplate>
+                        <EditItemTemplate>
+                            <asp:DropDownList ID="ddlEditSeatId" runat="server" CssClass="form-select"></asp:DropDownList>
+                        </EditItemTemplate>
+                    </asp:TemplateField>
                     <asp:BoundField DataField="TICKET_PRICE" HeaderText="Price" />
                     <asp:CommandField ShowEditButton="True" ShowDeleteButton="True"
                         HeaderText="Actions" ButtonType="Link" ControlStyle-CssClass="kc-grid-action" />

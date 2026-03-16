@@ -37,19 +37,19 @@
                 </div>
                 <div class="col-6 col-md-4 col-xl-2">
                     <div class="kc-kpi-card">
-                        <p>Tickets Sold</p>
+                        <p>Paid Seats Sold</p>
                         <h3><asp:Literal ID="litTicketsSold" runat="server" /></h3>
                     </div>
                 </div>
                 <div class="col-6 col-md-4 col-xl-2">
                     <div class="kc-kpi-card">
-                        <p>Daily Bookings</p>
+                        <p>Bookings for Today's Shows</p>
                         <h3><asp:Literal ID="litDailyBookings" runat="server" /></h3>
                     </div>
                 </div>
                 <div class="col-6 col-md-4 col-xl-2">
                     <div class="kc-kpi-card">
-                        <p>Most Popular</p>
+                        <p>Top Movie (Paid Seats)</p>
                         <h3 class="kc-kpi-title"><asp:Literal ID="litPopularMovie" runat="server" /></h3>
                     </div>
                 </div>
@@ -68,7 +68,7 @@
                 <div class="col-lg-8">
                     <div class="kc-chart-card">
                         <div class="kc-chart-card__head">
-                            <h5>Bookings Trend (Last 7 Days)</h5>
+                            <h5>Bookings for Shows Trend (Last 7 Days)</h5>
                         </div>
                         <canvas id="bookingsTrendChart" height="120"></canvas>
                     </div>
@@ -76,7 +76,7 @@
                 <div class="col-lg-4">
                     <div class="kc-chart-card">
                         <div class="kc-chart-card__head">
-                            <h5>Tickets Sold by Movie</h5>
+                            <h5>Paid Seats by Movie</h5>
                         </div>
                         <canvas id="ticketsByMovieChart" height="120"></canvas>
                     </div>
@@ -84,7 +84,7 @@
                 <div class="col-12">
                     <div class="kc-chart-card">
                         <div class="kc-chart-card__head">
-                            <h5>Occupancy by Theater</h5>
+                            <h5>Occupancy by City Hall</h5>
                         </div>
                         <canvas id="occupancyByTheaterChart" height="95"></canvas>
                     </div>
@@ -321,7 +321,7 @@
             var tickets = parseField("hfChartTickets", { Labels: [], Values: [] });
             var occupancy = parseField("hfChartOccupancy", { Labels: [], Values: [] });
 
-            renderLineChart("bookingsTrendChart", bookings, "Bookings");
+            renderLineChart("bookingsTrendChart", bookings, "Bookings for Shows");
             renderBarChart("ticketsByMovieChart", tickets, "#f5c518", false);
             renderBarChart("occupancyByTheaterChart", occupancy, "#e50914", true);
             rotateHero();

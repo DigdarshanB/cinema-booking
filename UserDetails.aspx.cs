@@ -2,6 +2,7 @@ using Oracle.ManagedDataAccess.Client;
 using System;
 using System.Configuration;
 using System.Data;
+using System.Text.RegularExpressions;
 
 namespace KumariCinemas
 {
@@ -31,7 +32,7 @@ namespace KumariCinemas
         {
             using (var con = new OracleConnection(Cs))
             using (var cmd = new OracleCommand(
-                "SELECT CUSTOMER_ID, CUSTOMER_NAME, CUSTOMER_CONTACT, USERNAME, \"address \" AS ADDRESS " +
+                "SELECT CUSTOMER_ID, CUSTOMER_NAME, CUSTOMER_CONTACT, USERNAME, ADDRESS " +
                 "FROM CUSTOMER ORDER BY CUSTOMER_ID", con))
             using (var da = new OracleDataAdapter(cmd))
             {
@@ -47,9 +48,22 @@ namespace KumariCinemas
         {
             try
             {
+                string validationMessage;
+                if (!ValidateCustomerInput(
+                    txtCustomerId.Text,
+                    txtCustomerName.Text,
+                    txtContact.Text,
+                    txtUsername.Text,
+                    txtAddress.Text,
+                    out validationMessage))
+                {
+                    SetMessage(validationMessage, false);
+                    return;
+                }
+
                 using (var con = new OracleConnection(Cs))
                 using (var cmd = new OracleCommand(
-                    "INSERT INTO CUSTOMER (CUSTOMER_ID, CUSTOMER_NAME, CUSTOMER_CONTACT, USERNAME, \"address \") " +
+                    "INSERT INTO CUSTOMER (CUSTOMER_ID, CUSTOMER_NAME, CUSTOMER_CONTACT, USERNAME, ADDRESS) " +
                     "VALUES (:pId, :pName, :pContact, :pUsername, :pAddress)", con))
                 {
                     cmd.Parameters.Add(":pId",       OracleDbType.Varchar2).Value = txtCustomerId.Text.Trim();
@@ -70,9 +84,13 @@ namespace KumariCinemas
                 BindGrid();
                 SetMessage("Customer added successfully.", true);
             }
+            catch (OracleException ex) when (ex.Number == 1)
+            {
+                SetMessage("Customer ID or username already exists.", false);
+            }
             catch (Exception ex)
             {
-                SetMessage(ex.Message, false);
+                SetMessage("Unable to add customer. Please verify the provided values.", false);
             }
         }
 
@@ -105,10 +123,17 @@ namespace KumariCinemas
                 string user    = e.NewValues["USERNAME"]?.ToString()         ?? "";
                 string address = e.NewValues["ADDRESS"]?.ToString()          ?? "";
 
+                string validationMessage;
+                if (!ValidateCustomerInput(id, name, contact, user, address, out validationMessage))
+                {
+                    SetMessage(validationMessage, false);
+                    return;
+                }
+
                 using (var con = new OracleConnection(Cs))
                 using (var cmd = new OracleCommand(
                     "UPDATE CUSTOMER SET CUSTOMER_NAME = :pName, CUSTOMER_CONTACT = :pContact, " +
-                    "USERNAME = :pUsername, \"address \" = :pAddress WHERE CUSTOMER_ID = :pId", con))
+                    "USERNAME = :pUsername, ADDRESS = :pAddress WHERE CUSTOMER_ID = :pId", con))
                 {
                     cmd.Parameters.Add(":pName",     OracleDbType.Varchar2).Value = name.Trim();
                     cmd.Parameters.Add(":pContact",  OracleDbType.Varchar2).Value = contact.Trim();
@@ -124,9 +149,13 @@ namespace KumariCinemas
                 BindGrid();
                 SetMessage("Customer updated successfully.", true);
             }
+            catch (OracleException ex) when (ex.Number == 1)
+            {
+                SetMessage("Customer information conflicts with existing records.", false);
+            }
             catch (Exception ex)
             {
-                SetMessage(ex.Message, false);
+                SetMessage("Unable to update customer. Please verify the provided values.", false);
             }
         }
 
@@ -149,9 +178,13 @@ namespace KumariCinemas
                 BindGrid();
                 SetMessage("Customer deleted successfully.", true);
             }
+            catch (OracleException ex) when (ex.Number == 2292)
+            {
+                SetMessage("Cannot delete this customer because related booking records exist.", false);
+            }
             catch (Exception ex)
             {
-                SetMessage(ex.Message, false);
+                SetMessage("Unable to delete customer.", false);
             }
         }
 
@@ -168,6 +201,30 @@ namespace KumariCinemas
         {
             lblMsg.Text = message;
             lblMsg.CssClass = success ? "kc-msg kc-msg-success" : "kc-msg kc-msg-error";
+        }
+
+        private bool ValidateCustomerInput(string id, string name, string contact, string username, string address, out string message)
+        {
+            message = "";
+
+            if (string.IsNullOrWhiteSpace(id) ||
+                string.IsNullOrWhiteSpace(name) ||
+                string.IsNullOrWhiteSpace(contact) ||
+                string.IsNullOrWhiteSpace(username) ||
+                string.IsNullOrWhiteSpace(address))
+            {
+                message = "Please fill all required fields.";
+                return false;
+            }
+
+            string trimmedContact = contact.Trim();
+            if (!Regex.IsMatch(trimmedContact, "^[0-9+\\-() ]{7,20}$"))
+            {
+                message = "Please provide a valid contact number.";
+                return false;
+            }
+
+            return true;
         }
     }
 }

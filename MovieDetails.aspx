@@ -1,4 +1,4 @@
-<%@ Page Title="Movie Details" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="MovieDetails.aspx.cs" Inherits="KumariCinemas.MovieDetails" %>
+<%@ Page Title="Movie Details" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="MovieDetails.aspx.cs" Inherits="KumariCinemas.MovieDetails" MaintainScrollPositionOnPostBack="true" %>
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
 
@@ -6,8 +6,6 @@
         <h2><i class="bi bi-camera-reels-fill"></i> Movie Management</h2>
         <p>Curate the cinema catalog, maintain release details, and keep show-ready records.</p>
     </div>
-
-    <asp:Label ID="lblMsg" runat="server" CssClass="kc-msg" />
 
     <div class="kc-card">
         <h4><i class="bi bi-film"></i> Movie Entry Form</h4>
@@ -34,7 +32,7 @@
             </div>
             <div class="col-md-6 col-xl-1">
                 <label class="form-label">Release Date</label>
-                <asp:TextBox ID="txtReleaseDate" runat="server" CssClass="form-control" placeholder="DD/MM/YYYY"></asp:TextBox>
+                <asp:TextBox ID="txtReleaseDate" runat="server" CssClass="form-control" TextMode="Date" placeholder="DD/MM/YYYY"></asp:TextBox>
             </div>
             <div class="col-12">
                 <div class="kc-form-actions">
@@ -44,6 +42,8 @@
             </div>
         </div>
     </div>
+
+    <asp:Label ID="lblMsg" runat="server" CssClass="kc-msg" />
 
     <div class="kc-card">
         <h4>Movie Records</h4>

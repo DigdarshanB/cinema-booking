@@ -1,4 +1,4 @@
-<%@ Page Title="Theater CityHall Movie" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="TheaterCityHallMovie.aspx.cs" Inherits="KumariCinemas.TheaterCityHallMovie" %>
+<%@ Page Title="Theater CityHall Movie" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="TheaterCityHallMovie.aspx.cs" Inherits="KumariCinemas.TheaterCityHallMovie" MaintainScrollPositionOnPostBack="true" %>
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
 
@@ -6,8 +6,6 @@
         <h2><i class="bi bi-collection-play-fill"></i> Theater-City Hall Movie Mapper</h2>
         <p>Review venue-wise movie lineups and schedules in one clear relationship view.</p>
     </div>
-
-    <asp:Label ID="lblMsg" runat="server" CssClass="kc-msg" />
 
     <div class="kc-card">
         <h4><i class="bi bi-funnel-fill"></i> City Hall Filter</h4>
@@ -27,6 +25,8 @@
             </div>
         </div>
     </div>
+
+    <asp:Label ID="lblMsg" runat="server" CssClass="kc-msg" />
 
     <asp:Panel ID="pnlResults" runat="server" Visible="false">
 
@@ -78,9 +78,10 @@
                     EmptyDataText="No showtimes found for this city hall.">
                     <Columns>
                         <asp:BoundField DataField="SHOW_ID"   HeaderText="Show ID" />
+                        <asp:BoundField DataField="MOVIE_ID" HeaderText="Movie ID" />
+                        <asp:BoundField DataField="MOVIE_TITLE" HeaderText="Movie Title" />
                         <asp:BoundField DataField="SHOW_DATE" HeaderText="Show Date" />
                         <asp:BoundField DataField="SHOW_TIME" HeaderText="Show Time" />
-                        <asp:BoundField DataField="DAY_TYPE"  HeaderText="Day Type" />
                     </Columns>
                 </asp:GridView>
             </div>

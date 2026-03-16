@@ -2,6 +2,8 @@ using Oracle.ManagedDataAccess.Client;
 using System;
 using System.Configuration;
 using System.Data;
+using System.Web.UI;
+using System.Web.UI.WebControls;
 
 namespace KumariCinemas
 {
@@ -29,7 +31,7 @@ namespace KumariCinemas
 
         private void BindTheatreDropDown()
         {
-            string sql = "SELECT THEATRE_ID, \"theatre_name \" AS THEATRE_NAME " +
+            string sql = "SELECT THEATRE_ID, THEATRE_NAME " +
                 "FROM THEATRE ORDER BY THEATRE_NAME";
 
             using (var con = new OracleConnection(Cs))
@@ -43,6 +45,7 @@ namespace KumariCinemas
                 ddlTheatreId.DataTextField  = "THEATRE_NAME";
                 ddlTheatreId.DataValueField = "THEATRE_ID";
                 ddlTheatreId.DataBind();
+                ddlTheatreId.Items.Insert(0, new ListItem("-- Select Theatre --", ""));
             }
         }
 
@@ -51,7 +54,7 @@ namespace KumariCinemas
             using (var con = new OracleConnection(Cs))
             using (var cmd = new OracleCommand(
                 "SELECT CITYHALL_ID, THEATRE_ID, CITYHALL_NAME, CITYHALL_LOCATION " +
-                "FROM THEATRECITYHALL ORDER BY CITYHALL_ID", con))
+                "FROM THEATRE_CITY_HALL ORDER BY CITYHALL_ID", con))
             using (var da = new OracleDataAdapter(cmd))
             {
                 var dt = new DataTable();
@@ -66,9 +69,23 @@ namespace KumariCinemas
         {
             try
             {
+                if (string.IsNullOrWhiteSpace(txtCityhallId.Text) ||
+                    string.IsNullOrWhiteSpace(txtCityhallName.Text) ||
+                    string.IsNullOrWhiteSpace(txtCityhallLocation.Text))
+                {
+                    SetMessage("Please fill all required fields before saving.", false);
+                    return;
+                }
+
+                if (string.IsNullOrWhiteSpace(ddlTheatreId.SelectedValue))
+                {
+                    SetMessage("Please choose a theatre.", false);
+                    return;
+                }
+
                 using (var con = new OracleConnection(Cs))
                 using (var cmd = new OracleCommand(
-                    "INSERT INTO THEATRECITYHALL (CITYHALL_ID, THEATRE_ID, CITYHALL_NAME, CITYHALL_LOCATION) " +
+                    "INSERT INTO THEATRE_CITY_HALL (CITYHALL_ID, THEATRE_ID, CITYHALL_NAME, CITYHALL_LOCATION) " +
                     "VALUES (:pId, :pTheatreId, :pName, :pLocation)", con))
                 {
                     cmd.Parameters.Add(":pId",        OracleDbType.Varchar2).Value = txtCityhallId.Text.Trim();
@@ -86,9 +103,13 @@ namespace KumariCinemas
                 BindGrid();
                 SetMessage("Theater City Hall added successfully.", true);
             }
+            catch (OracleException ex) when (ex.Number == 1)
+            {
+                SetMessage("City Hall ID already exists. Please use a unique City Hall ID.", false);
+            }
             catch (Exception ex)
             {
-                SetMessage(ex.Message, false);
+                SetMessage("Unable to add theater city hall. Please verify the provided values.", false);
             }
         }
 
@@ -116,13 +137,21 @@ namespace KumariCinemas
             try
             {
                 string id       = gvTheaters.DataKeys[e.RowIndex].Value.ToString();
-                string theatreId = e.NewValues["THEATRE_ID"]?.ToString()       ?? "";
+                GridViewRow row = gvTheaters.Rows[e.RowIndex];
+                var ddlEditTheatreId = row.FindControl("ddlEditTheatreId") as DropDownList;
+                string theatreId = ddlEditTheatreId == null ? "" : ddlEditTheatreId.SelectedValue;
                 string name     = e.NewValues["CITYHALL_NAME"]?.ToString()     ?? "";
                 string location = e.NewValues["CITYHALL_LOCATION"]?.ToString() ?? "";
 
+                if (string.IsNullOrWhiteSpace(theatreId) || string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(location))
+                {
+                    SetMessage("Please choose a theatre and complete name/location.", false);
+                    return;
+                }
+
                 using (var con = new OracleConnection(Cs))
                 using (var cmd = new OracleCommand(
-                    "UPDATE THEATRECITYHALL SET THEATRE_ID = :pTheatreId, CITYHALL_NAME = :pName, " +
+                    "UPDATE THEATRE_CITY_HALL SET THEATRE_ID = :pTheatreId, CITYHALL_NAME = :pName, " +
                     "CITYHALL_LOCATION = :pLocation WHERE CITYHALL_ID = :pId", con))
                 {
                     cmd.Parameters.Add(":pTheatreId", OracleDbType.Varchar2).Value = theatreId.Trim();
@@ -140,7 +169,7 @@ namespace KumariCinemas
             }
             catch (Exception ex)
             {
-                SetMessage(ex.Message, false);
+                SetMessage("Unable to update theater city hall. Please verify the provided values.", false);
             }
         }
 
@@ -152,7 +181,7 @@ namespace KumariCinemas
 
                 using (var con = new OracleConnection(Cs))
                 using (var cmd = new OracleCommand(
-                    "DELETE FROM THEATRECITYHALL WHERE CITYHALL_ID = :pId", con))
+                    "DELETE FROM THEATRE_CITY_HALL WHERE CITYHALL_ID = :pId", con))
                 {
                     cmd.Parameters.Add(":pId", OracleDbType.Varchar2).Value = id;
 
@@ -163,9 +192,44 @@ namespace KumariCinemas
                 BindGrid();
                 SetMessage("Theater City Hall deleted successfully.", true);
             }
+            catch (OracleException ex) when (ex.Number == 2292)
+            {
+                SetMessage("Cannot delete this city hall because it is referenced by other records.", false);
+            }
             catch (Exception ex)
             {
-                SetMessage(ex.Message, false);
+                SetMessage("Unable to delete theater city hall.", false);
+            }
+        }
+
+        protected void gvTheaters_RowDataBound(object sender, GridViewRowEventArgs e)
+        {
+            if (e.Row.RowType != DataControlRowType.DataRow || (e.Row.RowState & DataControlRowState.Edit) == 0)
+                return;
+
+            var ddlEditTheatreId = e.Row.FindControl("ddlEditTheatreId") as DropDownList;
+            if (ddlEditTheatreId == null)
+                return;
+
+            using (var con = new OracleConnection(Cs))
+            using (var cmd = new OracleCommand("SELECT THEATRE_ID, THEATRE_NAME FROM THEATRE ORDER BY THEATRE_NAME", con))
+            using (var da = new OracleDataAdapter(cmd))
+            {
+                var dt = new DataTable();
+                da.Fill(dt);
+
+                ddlEditTheatreId.DataSource = dt;
+                ddlEditTheatreId.DataTextField = "THEATRE_NAME";
+                ddlEditTheatreId.DataValueField = "THEATRE_ID";
+                ddlEditTheatreId.DataBind();
+
+                object theatreObj = DataBinder.Eval(e.Row.DataItem, "THEATRE_ID");
+                if (theatreObj != null)
+                {
+                    var item = ddlEditTheatreId.Items.FindByValue(theatreObj.ToString());
+                    if (item != null)
+                        ddlEditTheatreId.SelectedValue = theatreObj.ToString();
+                }
             }
         }
 

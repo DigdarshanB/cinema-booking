@@ -37,19 +37,28 @@ namespace KumariCinemas
 
         private void BindCityHallDropDown()
         {
-            using (var con = new OracleConnection(Cs))
-            using (var cmd = new OracleCommand(
-                "SELECT CITYHALL_ID, CITYHALL_NAME FROM THEATRECITYHALL ORDER BY CITYHALL_NAME", con))
-            using (var da = new OracleDataAdapter(cmd))
+            try
             {
-                var dt = new DataTable();
-                da.Fill(dt);
+                using (var con = new OracleConnection(Cs))
+                using (var cmd = new OracleCommand(
+                    "SELECT CITYHALL_ID, CITYHALL_NAME FROM THEATRE_CITY_HALL ORDER BY CITYHALL_NAME", con))
+                using (var da = new OracleDataAdapter(cmd))
+                {
+                    var dt = new DataTable();
+                    da.Fill(dt);
 
-                ddlCityHall.DataSource     = dt;
-                ddlCityHall.DataTextField  = "CITYHALL_NAME";
-                ddlCityHall.DataValueField = "CITYHALL_ID";
-                ddlCityHall.DataBind();
+                    ddlCityHall.DataSource = dt;
+                    ddlCityHall.DataTextField = "CITYHALL_NAME";
+                    ddlCityHall.DataValueField = "CITYHALL_ID";
+                    ddlCityHall.DataBind();
+                    ddlCityHall.Items.Insert(0, new System.Web.UI.WebControls.ListItem("-- Select City Hall --", ""));
+                }
+            }
+            catch
+            {
+                ddlCityHall.Items.Clear();
                 ddlCityHall.Items.Insert(0, new System.Web.UI.WebControls.ListItem("-- Select City Hall --", ""));
+                SetMessage("Unable to load city hall list right now.", false);
             }
         }
 
@@ -66,11 +75,33 @@ namespace KumariCinemas
             }
 
             string cityhallId = ddlCityHall.SelectedValue;
-            LoadCityHallDetails(cityhallId);
-            LoadMovies(cityhallId);
-            LoadShowtimes(cityhallId);
-            pnlResults.Visible = true;
-            SetMessage("Relationship records loaded successfully.", true);
+            try
+            {
+                LoadCityHallDetails(cityhallId);
+                LoadMovies(cityhallId);
+                LoadShowtimes(cityhallId);
+                pnlResults.Visible = true;
+
+                int movieCount;
+                int showtimeCount;
+                int.TryParse(lblMovieCount.Text, out movieCount);
+                int.TryParse(lblShowtimeCount.Text, out showtimeCount);
+
+                if (movieCount == 0 && showtimeCount == 0)
+                    SetMessage("No related movies or showtimes found for the selected city hall.", false);
+                else
+                    SetMessage("Relationship records loaded successfully.", true);
+            }
+            catch (ApplicationException ex)
+            {
+                pnlResults.Visible = false;
+                SetMessage(ex.Message, false);
+            }
+            catch
+            {
+                pnlResults.Visible = false;
+                SetMessage("Unable to load relationship details right now.", false);
+            }
         }
 
         protected void btnReset_Click(object sender, EventArgs e)
@@ -88,77 +119,98 @@ namespace KumariCinemas
 
         private void LoadCityHallDetails(string cityhallId)
         {
-            string sql = "SELECT CITYHALL_ID, THEATRE_ID, CITYHALL_NAME, CITYHALL_LOCATION " +
-                "FROM THEATRECITYHALL WHERE CITYHALL_ID = :pId";
-
-            using (var con = new OracleConnection(Cs))
-            using (var cmd = new OracleCommand(sql, con))
-            using (var da = new OracleDataAdapter(cmd))
+            try
             {
-                cmd.Parameters.Add(":pId", OracleDbType.Varchar2).Value = cityhallId;
+                string sql = "SELECT CITYHALL_ID, THEATRE_ID, CITYHALL_NAME, CITYHALL_LOCATION " +
+                    "FROM THEATRE_CITY_HALL WHERE CITYHALL_ID = :pId";
 
-                var dt = new DataTable();
-                da.Fill(dt);
-
-                if (dt.Rows.Count > 0)
+                using (var con = new OracleConnection(Cs))
+                using (var cmd = new OracleCommand(sql, con))
+                using (var da = new OracleDataAdapter(cmd))
                 {
-                    DataRow r = dt.Rows[0];
-                    lblCityhallId.Text       = r["CITYHALL_ID"].ToString();
-                    lblTheatreId.Text        = r["THEATRE_ID"].ToString();
-                    lblCityhallName.Text     = r["CITYHALL_NAME"].ToString();
-                    lblCityhallLocation.Text = r["CITYHALL_LOCATION"].ToString();
-                    lblSelectedCityHall.Text = lblCityhallName.Text;
+                    cmd.Parameters.Add(":pId", OracleDbType.Varchar2).Value = cityhallId;
+
+                    var dt = new DataTable();
+                    da.Fill(dt);
+
+                    if (dt.Rows.Count > 0)
+                    {
+                        DataRow r = dt.Rows[0];
+                        lblCityhallId.Text = r["CITYHALL_ID"].ToString();
+                        lblTheatreId.Text = r["THEATRE_ID"].ToString();
+                        lblCityhallName.Text = r["CITYHALL_NAME"].ToString();
+                        lblCityhallLocation.Text = r["CITYHALL_LOCATION"].ToString();
+                        lblSelectedCityHall.Text = lblCityhallName.Text;
+                    }
                 }
+            }
+            catch
+            {
+                throw new ApplicationException("Unable to load hall details right now.");
             }
         }
 
         private void LoadMovies(string cityhallId)
         {
-            string sql =
-                "SELECT m.MOVIE_ID, m.MOVIE_TITLE, m.DURATION, " +
-                "m.MOVIE_LANGUAGE, m.MOVIE_GENRE, " +
-                "m.\"release_date \" AS RELEASE_DATE " +
-                "FROM \"CityHall-Movie\" cm " +
-                "JOIN MOVIE m ON cm.MOVIE_ID = m.MOVIE_ID " +
-                "WHERE cm.CITYHALL_ID = :pId " +
-                "ORDER BY m.MOVIE_TITLE";
-
-            using (var con = new OracleConnection(Cs))
-            using (var cmd = new OracleCommand(sql, con))
-            using (var da = new OracleDataAdapter(cmd))
+            try
             {
-                cmd.Parameters.Add(":pId", OracleDbType.Varchar2).Value = cityhallId;
+                string sql =
+                    "SELECT m.MOVIE_ID, m.MOVIE_TITLE, m.DURATION, " +
+                    "m.MOVIE_LANGUAGE, m.MOVIE_GENRE, " +
+                    "m.RELEASE_DATE " +
+                    "FROM CITYHALL_MOVIE cm " +
+                    "JOIN MOVIE m ON cm.MOVIE_ID = m.MOVIE_ID " +
+                    "WHERE cm.CITYHALL_ID = :pId " +
+                    "ORDER BY m.MOVIE_TITLE";
 
-                var dt = new DataTable();
-                da.Fill(dt);
+                using (var con = new OracleConnection(Cs))
+                using (var cmd = new OracleCommand(sql, con))
+                using (var da = new OracleDataAdapter(cmd))
+                {
+                    cmd.Parameters.Add(":pId", OracleDbType.Varchar2).Value = cityhallId;
 
-                gvMovies.DataSource = dt;
-                gvMovies.DataBind();
-                lblMovieCount.Text = dt.Rows.Count.ToString();
+                    var dt = new DataTable();
+                    da.Fill(dt);
+
+                    gvMovies.DataSource = dt;
+                    gvMovies.DataBind();
+                    lblMovieCount.Text = dt.Rows.Count.ToString();
+                }
+            }
+            catch
+            {
+                throw new ApplicationException("Unable to load movie list right now.");
             }
         }
 
         private void LoadShowtimes(string cityhallId)
         {
-            string sql =
-                "SELECT s.SHOW_ID, s.SHOW_DATE, s.SHOW_TIME, " +
-                "s.\"day_type \" AS DAY_TYPE " +
-                "FROM \"SHOW\" s " +
-                "WHERE s.CITYHALL_ID = :pId " +
-                "ORDER BY s.SHOW_DATE DESC";
-
-            using (var con = new OracleConnection(Cs))
-            using (var cmd = new OracleCommand(sql, con))
-            using (var da = new OracleDataAdapter(cmd))
+            try
             {
-                cmd.Parameters.Add(":pId", OracleDbType.Varchar2).Value = cityhallId;
+                string sql =
+                    "SELECT s.SHOW_ID, s.MOVIE_ID, m.MOVIE_TITLE, s.SHOW_DATE, s.SHOW_TIME " +
+                    "FROM \"SHOW\" s " +
+                    "LEFT JOIN MOVIE m ON s.MOVIE_ID = m.MOVIE_ID " +
+                    "WHERE s.CITYHALL_ID = :pId " +
+                    "ORDER BY s.SHOW_DATE DESC";
 
-                var dt = new DataTable();
-                da.Fill(dt);
+                using (var con = new OracleConnection(Cs))
+                using (var cmd = new OracleCommand(sql, con))
+                using (var da = new OracleDataAdapter(cmd))
+                {
+                    cmd.Parameters.Add(":pId", OracleDbType.Varchar2).Value = cityhallId;
 
-                gvShowtimes.DataSource = dt;
-                gvShowtimes.DataBind();
-                lblShowtimeCount.Text = dt.Rows.Count.ToString();
+                    var dt = new DataTable();
+                    da.Fill(dt);
+
+                    gvShowtimes.DataSource = dt;
+                    gvShowtimes.DataBind();
+                    lblShowtimeCount.Text = dt.Rows.Count.ToString();
+                }
+            }
+            catch
+            {
+                throw new ApplicationException("Unable to load showtime details right now.");
             }
         }
 

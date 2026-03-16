@@ -1,4 +1,4 @@
-<%@ Page Title="User Details" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="UserDetails.aspx.cs" Inherits="KumariCinemas.UserDetails" %>
+<%@ Page Title="User Details" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="UserDetails.aspx.cs" Inherits="KumariCinemas.UserDetails" MaintainScrollPositionOnPostBack="true" %>
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
 
@@ -6,8 +6,6 @@
         <h2><i class="bi bi-people-fill"></i> Users Management</h2>
         <p>Create, update, and maintain cinema customer profiles from a single screen.</p>
     </div>
-
-    <asp:Label ID="lblMsg" runat="server" CssClass="kc-msg" />
 
     <div class="kc-card">
         <h4><i class="bi bi-person-plus-fill"></i> Customer Form</h4>
@@ -40,6 +38,8 @@
             </div>
         </div>
     </div>
+
+    <asp:Label ID="lblMsg" runat="server" CssClass="kc-msg" />
 
     <div class="kc-card">
         <h4><i class="bi bi-table"></i> Customer List</h4>

@@ -35,19 +35,28 @@ namespace KumariCinemas
 
         private void BindCustomerDropDown()
         {
-            using (var con = new OracleConnection(Cs))
-            using (var cmd = new OracleCommand(
-                "SELECT CUSTOMER_ID, CUSTOMER_NAME FROM CUSTOMER ORDER BY CUSTOMER_NAME", con))
-            using (var da = new OracleDataAdapter(cmd))
+            try
             {
-                var dt = new DataTable();
-                da.Fill(dt);
+                using (var con = new OracleConnection(Cs))
+                using (var cmd = new OracleCommand(
+                    "SELECT CUSTOMER_ID, CUSTOMER_NAME FROM CUSTOMER ORDER BY CUSTOMER_NAME", con))
+                using (var da = new OracleDataAdapter(cmd))
+                {
+                    var dt = new DataTable();
+                    da.Fill(dt);
 
-                ddlCustomer.DataSource     = dt;
-                ddlCustomer.DataTextField  = "CUSTOMER_NAME";
-                ddlCustomer.DataValueField = "CUSTOMER_ID";
-                ddlCustomer.DataBind();
+                    ddlCustomer.DataSource = dt;
+                    ddlCustomer.DataTextField = "CUSTOMER_NAME";
+                    ddlCustomer.DataValueField = "CUSTOMER_ID";
+                    ddlCustomer.DataBind();
+                    ddlCustomer.Items.Insert(0, new System.Web.UI.WebControls.ListItem("-- Select Customer --", ""));
+                }
+            }
+            catch
+            {
+                ddlCustomer.Items.Clear();
                 ddlCustomer.Items.Insert(0, new System.Web.UI.WebControls.ListItem("-- Select Customer --", ""));
+                SetMessage("Unable to load customer list right now.", false);
             }
         }
 
@@ -64,9 +73,17 @@ namespace KumariCinemas
             }
 
             string customerId = ddlCustomer.SelectedValue;
-            LoadCustomerDetails(customerId);
-            LoadTickets(customerId);
-            pnlResults.Visible = true;
+            try
+            {
+                bool customerLoaded = LoadCustomerDetails(customerId);
+                bool ticketsLoaded = LoadTickets(customerId);
+                pnlResults.Visible = customerLoaded || ticketsLoaded;
+            }
+            catch
+            {
+                pnlResults.Visible = false;
+                SetMessage("Unable to load ticket history right now.", false);
+            }
         }
 
         protected void btnReset_Click(object sender, EventArgs e)
@@ -80,66 +97,91 @@ namespace KumariCinemas
             lblTicketCount.Text = "0";
         }
 
-        private void LoadCustomerDetails(string customerId)
+        private bool LoadCustomerDetails(string customerId)
         {
             string sql = "SELECT CUSTOMER_ID, CUSTOMER_NAME, CUSTOMER_CONTACT, USERNAME, " +
-                "\"address \" AS ADDRESS FROM CUSTOMER WHERE CUSTOMER_ID = :pId";
+                "ADDRESS FROM CUSTOMER WHERE CUSTOMER_ID = :pId";
 
-            using (var con = new OracleConnection(Cs))
-            using (var cmd = new OracleCommand(sql, con))
-            using (var da = new OracleDataAdapter(cmd))
+            try
             {
-                cmd.Parameters.Add(":pId", OracleDbType.Varchar2).Value = customerId;
-
-                var dt = new DataTable();
-                da.Fill(dt);
-
-                if (dt.Rows.Count > 0)
+                using (var con = new OracleConnection(Cs))
+                using (var cmd = new OracleCommand(sql, con))
+                using (var da = new OracleDataAdapter(cmd))
                 {
-                    DataRow r        = dt.Rows[0];
-                    lblCustomerId.Text   = r["CUSTOMER_ID"].ToString();
-                    lblCustomerName.Text = r["CUSTOMER_NAME"].ToString();
-                    lblContact.Text      = r["CUSTOMER_CONTACT"].ToString();
-                    lblUsername.Text     = r["USERNAME"].ToString();
-                    lblAddress.Text      = r["ADDRESS"].ToString();
-                    lblSelectedCustomer.Text = lblCustomerName.Text;
+                    cmd.Parameters.Add(":pId", OracleDbType.Varchar2).Value = customerId;
+
+                    var dt = new DataTable();
+                    da.Fill(dt);
+
+                    if (dt.Rows.Count > 0)
+                    {
+                        DataRow r = dt.Rows[0];
+                        lblCustomerId.Text = r["CUSTOMER_ID"].ToString();
+                        lblCustomerName.Text = r["CUSTOMER_NAME"].ToString();
+                        lblContact.Text = r["CUSTOMER_CONTACT"].ToString();
+                        lblUsername.Text = r["USERNAME"].ToString();
+                        lblAddress.Text = r["ADDRESS"].ToString();
+                        lblSelectedCustomer.Text = lblCustomerName.Text;
+                        return true;
+                    }
                 }
+
+                lblCustomerId.Text = "";
+                lblCustomerName.Text = "";
+                lblContact.Text = "";
+                lblUsername.Text = "";
+                lblAddress.Text = "";
+                lblSelectedCustomer.Text = "-";
+                SetMessage("Customer details are not available.", false);
+                return false;
+            }
+            catch
+            {
+                throw;
             }
         }
 
-        private void LoadTickets(string customerId)
+        private bool LoadTickets(string customerId)
         {
             string sql =
                 "SELECT t.TICKET_ID, b.BOOKING_ID, b.BOOKING_STATUS, " +
-                "t.SEAT_ID, t.TICKET_PRICE, s.SHOW_DATE, s.SHOW_TIME, " +
-                "s.\"day_type \" AS DAY_TYPE " +
+                "t.SEAT_ID, t.TICKET_PRICE, s.SHOW_DATE, s.SHOW_TIME " +
                 "FROM CUSTOMER c " +
-                "JOIN \"Customer-Booking\" cb ON c.CUSTOMER_ID = cb.CUSTOMER_ID " +
-                "JOIN BOOKING b ON cb.BOOKING_ID = b.BOOKING_ID " +
-                "JOIN \"Booking-Ticket\" bt ON b.BOOKING_ID = bt.BOOKING_ID " +
-                "JOIN TICKET t ON bt.TICKET_ID = t.TICKET_ID " +
+                "JOIN BOOKING b ON c.CUSTOMER_ID = b.CUSTOMER_ID " +
+                "JOIN TICKET t ON b.BOOKING_ID = t.BOOKING_ID " +
                 "JOIN \"SHOW\" s ON b.SHOW_ID = s.SHOW_ID " +
                 "WHERE c.CUSTOMER_ID = :pId " +
                 "AND s.SHOW_DATE >= ADD_MONTHS(SYSDATE, -6) " +
                 "ORDER BY s.SHOW_DATE DESC";
 
-            using (var con = new OracleConnection(Cs))
-            using (var cmd = new OracleCommand(sql, con))
-            using (var da = new OracleDataAdapter(cmd))
+            try
             {
-                cmd.Parameters.Add(":pId", OracleDbType.Varchar2).Value = customerId;
+                using (var con = new OracleConnection(Cs))
+                using (var cmd = new OracleCommand(sql, con))
+                using (var da = new OracleDataAdapter(cmd))
+                {
+                    cmd.Parameters.Add(":pId", OracleDbType.Varchar2).Value = customerId;
 
-                var dt = new DataTable();
-                da.Fill(dt);
+                    var dt = new DataTable();
+                    da.Fill(dt);
 
-                gvTickets.DataSource = dt;
-                gvTickets.DataBind();
-                lblTicketCount.Text = dt.Rows.Count.ToString();
+                    gvTickets.DataSource = dt;
+                    gvTickets.DataBind();
+                    lblTicketCount.Text = dt.Rows.Count.ToString();
 
-                if (dt.Rows.Count == 0)
-                    SetMessage("No tickets found for this customer in the last 6 months.", false);
-                else
+                    if (dt.Rows.Count == 0)
+                    {
+                        SetMessage("No tickets found for this customer for shows in the last 6 months.", false);
+                        return false;
+                    }
+
                     SetMessage("Ticket records loaded successfully.", true);
+                    return true;
+                }
+            }
+            catch
+            {
+                throw;
             }
         }
 

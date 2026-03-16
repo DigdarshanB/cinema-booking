@@ -1,4 +1,4 @@
-<%@ Page Title="Theater City Hall Details" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="TheaterCityHallDetails.aspx.cs" Inherits="KumariCinemas.TheaterCityHallDetails" %>
+<%@ Page Title="Theater City Hall Details" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="TheaterCityHallDetails.aspx.cs" Inherits="KumariCinemas.TheaterCityHallDetails" MaintainScrollPositionOnPostBack="true" %>
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
 
@@ -6,8 +6,6 @@
         <h2><i class="bi bi-building"></i> Theater &amp; City Hall Management</h2>
         <p>Manage venue halls, theatre mapping, and locations with a clean admin workflow.</p>
     </div>
-
-    <asp:Label ID="lblMsg" runat="server" CssClass="kc-msg" />
 
     <div class="kc-card">
         <h4><i class="bi bi-plus-circle"></i> City Hall Form</h4>
@@ -19,6 +17,7 @@
             <div class="col-md-6 col-xl-3">
                 <label class="form-label">Theatre</label>
                 <asp:DropDownList ID="ddlTheatreId" runat="server" CssClass="form-select"></asp:DropDownList>
+                <small class="text-muted d-block">Select a theatre before saving this city hall.</small>
             </div>
             <div class="col-md-6 col-xl-3">
                 <label class="form-label">City Hall Name</label>
@@ -37,6 +36,8 @@
         </div>
     </div>
 
+    <asp:Label ID="lblMsg" runat="server" CssClass="kc-msg" />
+
     <div class="kc-card">
         <h4><i class="bi bi-table"></i> Theater City Hall Records</h4>
         <div class="table-responsive">
@@ -48,10 +49,18 @@
                 OnRowEditing="gvTheaters_RowEditing"
                 OnRowCancelingEdit="gvTheaters_RowCancelingEdit"
                 OnRowUpdating="gvTheaters_RowUpdating"
-                OnRowDeleting="gvTheaters_RowDeleting">
+                OnRowDeleting="gvTheaters_RowDeleting"
+                OnRowDataBound="gvTheaters_RowDataBound">
                 <Columns>
                     <asp:BoundField DataField="CITYHALL_ID"       HeaderText="City Hall ID" ReadOnly="True" />
-                    <asp:BoundField DataField="THEATRE_ID"        HeaderText="Theatre ID" />
+                    <asp:TemplateField HeaderText="Theatre ID">
+                        <ItemTemplate>
+                            <%# Eval("THEATRE_ID") %>
+                        </ItemTemplate>
+                        <EditItemTemplate>
+                            <asp:DropDownList ID="ddlEditTheatreId" runat="server" CssClass="form-select"></asp:DropDownList>
+                        </EditItemTemplate>
+                    </asp:TemplateField>
                     <asp:BoundField DataField="CITYHALL_NAME"     HeaderText="Name" />
                     <asp:BoundField DataField="CITYHALL_LOCATION" HeaderText="Location" />
                     <asp:CommandField ShowEditButton="True" ShowDeleteButton="True"
