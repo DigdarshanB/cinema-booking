@@ -2,6 +2,8 @@
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
 
+    <div class="kc-showtimes-page">
+
     <div class="kc-page-header">
         <h2><i class="bi bi-clock-fill"></i> Showtimes Scheduling Panel</h2>
         <p>Create and maintain cinema schedules with clearer date/time planning and quick updates.</p>
@@ -21,7 +23,6 @@
             <div class="col-md-6 col-xl-2">
                 <label class="form-label">Movie ID</label>
                 <asp:DropDownList ID="ddlMovieId" runat="server" CssClass="form-select"></asp:DropDownList>
-                <small class="text-muted d-block">Movies appear after selecting a hall with mapped movies.</small>
             </div>
             <div class="col-md-6 col-xl-2">
                 <label class="form-label">Show Date</label>
@@ -41,7 +42,7 @@
         <div class="row g-3 kc-entry-help-row">
             <div class="col-md-6 col-xl-2"><small class="text-muted d-block">Must be unique. Keep format like S001. Can be auto-generated later.</small></div>
             <div class="col-md-6 col-xl-2"><small class="text-muted d-block">Use an existing hall ID from theater records.</small></div>
-            <div class="col-md-6 col-xl-2"><small class="text-muted d-block">Pick an existing movie ID.</small></div>
+            <div class="col-md-6 col-xl-2"><small class="text-muted d-block kc-showtimes-movie-help">Pick a mapped movie. Movies appear only after selecting a hall.</small></div>
             <div class="col-md-6 col-xl-2"><small class="text-muted d-block">Choose the screening date.</small></div>
             <div class="col-md-6 col-xl-2"><small class="text-muted d-block">Use local cinema time slot.</small></div>
         </div>
@@ -101,6 +102,8 @@
                 </Columns>
             </asp:GridView>
         </div>
+    </div>
+
     </div>
 
 </asp:Content>

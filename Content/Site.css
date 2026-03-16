@@ -362,10 +362,33 @@ a:hover { color: var(--kc-accent-hover); text-decoration: none; }
 .kc-entry-help-row small {
     line-height: 1.3;
 }
+
+/* Showtimes page layout polish */
+.kc-showtimes-page .kc-card + .kc-card {
+    margin-top: 1rem;
+}
+.kc-showtimes-page .kc-entry-row > [class*="col-"] {
+    display: flex;
+    flex-direction: column;
+}
+.kc-showtimes-page .kc-entry-row .form-control,
+.kc-showtimes-page .kc-entry-row .form-select {
+    min-height: 40px;
+}
+.kc-showtimes-page .kc-entry-help-row {
+    margin-top: .35rem;
+}
+.kc-showtimes-page .kc-showtimes-movie-help {
+    display: block;
+}
 @media (min-width: 1200px) {
     .kc-entry-row .kc-entry-actions-col {
         display: flex;
         align-items: flex-end;
+    }
+    .kc-showtimes-page .kc-entry-row .kc-entry-actions {
+        width: 100%;
+        justify-content: flex-start;
     }
 }
 
