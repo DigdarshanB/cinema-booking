@@ -198,6 +198,19 @@ a:hover { color: var(--kc-accent-hover); text-decoration: none; }
     transition: border-color .18s, box-shadow .18s;
 }
 .kc-card textarea.form-control { min-height: 90px; resize: vertical; }
+.kc-card .form-control[type="date"] {
+    min-height: 42px;
+    padding-right: 2.15rem;
+    color-scheme: dark;
+}
+.kc-card .form-control[type="date"]::-webkit-calendar-picker-indicator {
+    opacity: .96;
+    cursor: pointer;
+    padding: 3px;
+    border-radius: 4px;
+    background-color: rgba(255,255,255,.08);
+    filter: invert(86%) sepia(19%) saturate(675%) hue-rotate(338deg) brightness(105%) contrast(95%);
+}
 .kc-card .form-control::placeholder { color: #555; }
 .kc-card .form-control:focus, .kc-card .form-select:focus {
     border-color: var(--kc-accent) !important;
